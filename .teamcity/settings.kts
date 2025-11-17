@@ -4,7 +4,6 @@ import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.buildFeatures.parallelTests
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
-import jetbrains.buildServer.configs.kotlin.buildSteps.nodeJS
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.sequential
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
@@ -14,7 +13,7 @@ version = "2025.07"
 
 project {
     sequentialChain {
-        buildType(AllTests)
+        buildType(JvmTests)
     }
 }
 
@@ -23,9 +22,10 @@ fun Project.sequentialChain(block: CompoundStage.() -> Unit) {
     buildTypes.forEach(::buildType)
 }
 
-object AllTests : BuildType() {
+object JvmTests : BuildType() {
     init {
-        name = "All tests"
+        name = "JVM tests"
+        id("jvm-tests")
 
         vcs {
             root(DslContext.settingsRoot)
@@ -34,13 +34,7 @@ object AllTests : BuildType() {
         steps {
             gradle {
                 name = "Run all tests"
-                tasks = "check"
-            }
-        }
-
-        features {
-            parallelTests {
-                numberOfBatches = 10
+                tasks = "check -PjvmOnly=true"
             }
         }
 
