@@ -41,7 +41,7 @@ object JvmTests : BuildType() {
 
         features {
            runInDocker {
-              dockerImage = "ubuntu:latest"
+              dockerImage = "eclipse-temurin:21-jdk"
            }
         }
 
