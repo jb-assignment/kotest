@@ -7,6 +7,7 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.sequential
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
+import jetbrains.buildServer.configs.kotlin.ui.add
 import jetbrains.buildServer.configs.kotlin.version
 
 version = "2025.07"
@@ -39,9 +40,9 @@ object JvmTests : BuildType() {
             }
         }
 
-        features {
-           runInDocker {
-              dockerImage = "eclipse-temurin:21-jdk"
+        requirements {
+           add {
+              matches("teamcity.agent.jvm.os.family", "Linux")
            }
         }
 

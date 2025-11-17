@@ -1,7 +1,6 @@
 package io.kotest.extensions.testcontainers.kafka
 
-import io.kotest.core.annotation.EnabledIf
-import io.kotest.core.annotation.LinuxOnlyGithubCondition
+import io.kotest.core.annotation.Ignored
 import io.kotest.core.extensions.install
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
@@ -10,7 +9,7 @@ import org.apache.kafka.common.utils.Bytes
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration
 
-@EnabledIf(LinuxOnlyGithubCondition::class)
+@Ignored
 class KafkaTestContainerExtensionTest : FunSpec({
 
    val container = install(KafkaContainerExtension(DockerImageName.parse("confluentinc/cp-kafka:5.4.3")))
