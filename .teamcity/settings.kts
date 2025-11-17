@@ -2,7 +2,6 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.buildFeatures.parallelTests
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.sequential
@@ -25,7 +24,7 @@ fun Project.sequentialChain(block: CompoundStage.() -> Unit) {
 object JvmTests : BuildType() {
     init {
         name = "JVM tests"
-        id("jvm-tests")
+        id("jvm_tests")
 
         vcs {
             root(DslContext.settingsRoot)
