@@ -2,6 +2,7 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.buildFeatures.runInDocker
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.sequential
@@ -33,8 +34,15 @@ object JvmTests : BuildType() {
         steps {
             gradle {
                 name = "Run all tests"
-                tasks = "check -PjvmOnly=true"
+                tasks = "check"
+                gradleParams = "-PjvmOnly=true"
             }
+        }
+
+        features {
+           runInDocker {
+              dockerImage = "ubuntu:latest"
+           }
         }
 
         triggers {
