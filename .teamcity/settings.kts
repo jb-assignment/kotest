@@ -14,7 +14,7 @@ version = "2025.07"
 
 project {
     sequentialChain {
-        buildType(JvmCompile)
+//        buildType(JvmCompile)
         buildType(JvmTests)
     }
 }

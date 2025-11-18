@@ -8,6 +8,10 @@ plugins {
    //TODO this fails. why?? alias(libs.plugins.android.library) apply false
 }
 
+val initScript = File("/home/teamcity/agent/plugins/gradle-runner/scripts/init.gradle").readText()
+println("[init script]")
+println(initScript)
+
 allprojects {
    tasks.register("compileAllKotlinJvm") {
       project.tasks
