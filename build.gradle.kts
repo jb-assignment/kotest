@@ -8,9 +8,10 @@ plugins {
    //TODO this fails. why?? alias(libs.plugins.android.library) apply false
 }
 
-val initScript = File("/home/teamcity/agent/plugins/gradle-runner/scripts/init.gradle").readText()
-println("[init script]")
-println(initScript)
+val parallelTestsArtifactPath = System.getenv("TEAMCITY_PARALLEL_TESTS_ARTIFACT_PATH")
+println("path to artifact = $parallelTestsArtifactPath")
+println("content of the artifact:")
+println(File(parallelTestsArtifactPath).readText())
 
 allprojects {
    tasks.register("compileAllKotlinJvm") {
