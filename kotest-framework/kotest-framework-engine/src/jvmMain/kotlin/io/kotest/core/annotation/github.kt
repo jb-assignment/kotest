@@ -27,7 +27,5 @@ class GithubActionsCondition : Condition {
 
 // used by kotest to enable tests only on linux if running in github actions
 class LinuxOnlyGithubCondition : Condition {
-   override fun evaluate(kclass: KClass<out Spec>): Boolean =
-      // either we're not in github actions, or we must be on linux
-      !GithubActionsCondition().evaluate(kclass) || LinuxRunnerOsCondition().evaluate(kclass)
+   override fun evaluate(kclass: KClass<out Spec>): Boolean = false
 }

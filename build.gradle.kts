@@ -8,16 +8,23 @@ plugins {
    //TODO this fails. why?? alias(libs.plugins.android.library) apply false
 }
 
-val parallelTestsArtifactPath = System.getenv("TEAMCITY_PARALLEL_TESTS_ARTIFACT_PATH")
-println("path to artifact = $parallelTestsArtifactPath")
-println("content of the artifact:")
-println(File(parallelTestsArtifactPath).readText())
-
 allprojects {
    tasks.register("compileAllKotlinJvm") {
       project.tasks
          .filter { it.name in listOf("compileKotlinJvm", "compileTestKotlinJvm") }
          .forEach(::dependsOn)
+   }
+}
+
+gradle.projectsEvaluated {
+   allprojects {
+      tasks.withType<Test>().configureEach {
+         val correctedExcludePatterns = filter.excludePatterns
+            .map { if (it.endsWith(".*")) it.removeSuffix(".*") + "*" else it }
+            .toTypedArray()
+
+         filter.setExcludePatterns(*correctedExcludePatterns)
+      }
    }
 }
 
