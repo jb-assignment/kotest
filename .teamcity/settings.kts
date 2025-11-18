@@ -59,8 +59,7 @@ object JvmTests : BaseBuildType() {
 
         steps {
             gradle {
-                tasks = "check"
-                gradleParams = "-PjvmOnly=true"
+                tasks = "jvmTest"
             }
         }
 
