@@ -14,46 +14,64 @@ version = "2025.07"
 
 project {
     sequentialChain {
+        buildType(JvmCompile)
         buildType(JvmTests)
     }
 }
 
 fun Project.sequentialChain(block: CompoundStage.() -> Unit) {
-    val buildTypes = sequential(block).buildTypes()
-    buildTypes.forEach(::buildType)
+    sequential(block).buildTypes().forEach(::buildType)
 }
 
-object JvmTests : BuildType() {
+abstract class BaseBuildType : BuildType() {
     init {
-        name = "JVM tests"
-        id("jvm_tests")
-
         vcs {
             root(DslContext.settingsRoot)
         }
 
+        requirements {
+            add {
+                matches("teamcity.agent.jvm.os.family", "Linux")
+            }
+        }
+    }
+}
+
+object JvmCompile : BaseBuildType() {
+    init {
+        name = "Compile all JVM"
+
         steps {
             gradle {
-                name = "Run all tests"
+                tasks = "compileAllKotlinJvm"
+            }
+        }
+
+        params {
+            param("env.PUSH_TO_BUILD_CACHE", "true")
+        }
+    }
+}
+
+object JvmTests : BaseBuildType() {
+    init {
+        name = "JVM tests"
+
+        steps {
+            gradle {
                 tasks = "check"
                 gradleParams = "-PjvmOnly=true"
             }
         }
 
         features {
-           parallelTests {
-              numberOfBatches = 10
-           }
-        }
-
-        requirements {
-           add {
-              matches("teamcity.agent.jvm.os.family", "Linux")
-           }
+            parallelTests {
+                numberOfBatches = 10
+            }
         }
 
         triggers {
-            vcs {  }
+            vcs { }
         }
     }
 }

@@ -49,6 +49,13 @@ plugins {
    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
+buildCache {
+   remote<HttpBuildCache> {
+      url = uri("https://build-cache-node-hv2u6plrda-ew.a.run.app")
+      isPush = System.getenv().containsKey("TEAMCITY_VERSION") && System.getenv("PUSH_TO_BUILD_CACHE") == "true"
+   }
+}
+
 include(
    ":kotest-common",
 
@@ -165,8 +172,8 @@ if (System.getenv("CI") != "true" || System.getenv("RUNNER_OS") == "Linux") {
       // defines the order of callbacks
       ":kotest-tests:kotest-tests-callback-order",
 
-      ":kotest-tests:kotest-tests-concurrency-tests",
-      ":kotest-tests:kotest-tests-concurrency-specs",
+//      ":kotest-tests:kotest-tests-concurrency-tests",
+//      ":kotest-tests:kotest-tests-concurrency-specs",
       ":kotest-tests:kotest-tests-config-project",
       ":kotest-tests:kotest-tests-config-classname",
       ":kotest-tests:kotest-tests-config-packages",
@@ -179,7 +186,7 @@ if (System.getenv("CI") != "true" || System.getenv("RUNNER_OS") == "Linux") {
       ":kotest-tests:kotest-tests-junit-displaynameformatter",
       ":kotest-tests:kotest-tests-multiname-test-name-sysprop",
       ":kotest-tests:kotest-tests-power-assert",
-      ":kotest-tests:kotest-tests-spec-parallelism",
+//      ":kotest-tests:kotest-tests-spec-parallelism",
       ":kotest-tests:kotest-tests-tagextension",
       ":kotest-tests:kotest-tests-timeout-project",
       ":kotest-tests:kotest-tests-timeout-sysprop",

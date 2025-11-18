@@ -8,6 +8,14 @@ plugins {
    //TODO this fails. why?? alias(libs.plugins.android.library) apply false
 }
 
+allprojects {
+   tasks.register("compileAllKotlinJvm") {
+      project.tasks
+         .filter { it.name in listOf("compileKotlinJvm", "compileTestKotlinJvm") }
+         .forEach(::dependsOn)
+   }
+}
+
 apiValidation {
    ignoredPackages.addAll(
       listOf(
