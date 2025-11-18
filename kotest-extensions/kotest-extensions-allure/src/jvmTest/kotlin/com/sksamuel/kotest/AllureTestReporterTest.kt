@@ -3,6 +3,7 @@ package com.sksamuel.kotest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.kotest.core.annotation.Ignored
 import io.kotest.core.spec.Order
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.inspectors.forOne
@@ -13,6 +14,7 @@ import java.nio.file.Paths
 // so that when we get to this test, we have already run those tests and got data
 // this means you can't run this test in isolation as it depends on the other tests
 @Order(1)
+@Ignored // TODO special tag for tests not runnable in isolation
 class AllureTestReporterTest : WordSpec() {
 
    private val mapper = jacksonObjectMapper()
