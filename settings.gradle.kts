@@ -51,7 +51,7 @@ plugins {
 
 buildCache {
    remote<HttpBuildCache> {
-      url = uri("https://build-cache-node-hv2u6plrda-ew.a.run.app")
+      url = uri("https://build-cache-node-hv2u6plrda-ew.a.run.app/cache")
       isPush = System.getenv().containsKey("TEAMCITY_VERSION") && System.getenv("PUSH_TO_BUILD_CACHE") == "true"
    }
 }
