@@ -2,7 +2,7 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.buildFeatures.runInDocker
+import jetbrains.buildServer.configs.kotlin.buildFeatures.parallelTests
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.sequential
@@ -38,6 +38,12 @@ object JvmTests : BuildType() {
                 tasks = "check"
                 gradleParams = "-PjvmOnly=true"
             }
+        }
+
+        features {
+           parallelTests {
+              numberOfBatches = 10
+           }
         }
 
         requirements {
