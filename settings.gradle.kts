@@ -199,7 +199,7 @@ develocity {
    buildScan {
       termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
       termsOfUseAgree = "yes"
-      publishing.onlyIf { false }
+      publishing.onlyIf { true }
    }
 }
 
