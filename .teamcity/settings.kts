@@ -63,11 +63,11 @@ object JvmTests : BaseBuildType() {
             }
         }
 
-//        features {
-//            parallelTests {
-//                numberOfBatches = 10
-//            }
-//        }
+        features {
+            parallelTests {
+                numberOfBatches = 10
+            }
+        }
 
         triggers {
             vcs { }
