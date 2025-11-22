@@ -3,7 +3,8 @@ import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.PublishMode
-import jetbrains.buildServer.configs.kotlin.buildFeatures.parallelTests
+    import jetbrains.buildServer.configs.kotlin.RelativeId
+    import jetbrains.buildServer.configs.kotlin.buildFeatures.parallelTests
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.matrix
@@ -65,7 +66,7 @@ object JvmTests : BaseBuildType() {
             script {
                 scriptContent = """
                     pwd
-                    unzip ./test-results.zip
+                    unzip test-results.zip
                     ls -l
                 """.trimIndent()
             }
@@ -76,9 +77,9 @@ object JvmTests : BaseBuildType() {
         }
 
         dependencies {
-            artifacts(JvmTests) {
-                buildRule = lastSuccessful()
-                artifactRules = "+:test-results.zip => test-results.zip"
+            artifacts(RelativeId("JvmTests")) {
+                buildRule = lastPinned()
+                artifactRules = "test-results.zip"
             }
         }
 
