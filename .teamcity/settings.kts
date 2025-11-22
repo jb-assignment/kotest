@@ -65,6 +65,10 @@ object JvmTests : BaseBuildType() {
         artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results.zip"
 
         steps {
+            script {
+                scriptContent = "unzip test-results.zip"
+            }
+
             kotlinScript {
                 content = File("process-test-results.main.kts").readText()
             }
