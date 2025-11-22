@@ -1,4 +1,4 @@
-import jetbrains.buildServer.configs.kotlin.BuildType
+    import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
@@ -62,17 +62,25 @@ object JvmTests : BaseBuildType() {
         artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results.zip"
 
         steps {
-            gradle {
-                tasks = "jvmTest"
+            script {
+                scriptContent = """
+                    pwd
+                    unzip ./test-results.zip
+                    ls -l
+                """.trimIndent()
             }
+
+//            gradle {
+//                tasks = "jvmTest"
+//            }
         }
 
-//        dependencies {
-//            artifacts(JvmTests) {
-//                buildRule = lastSuccessful()
-//                artifactRules = "+:**/build/test-results/**/TEST-*.xml"
-//            }
-//        }
+        dependencies {
+            artifacts(JvmTests) {
+                buildRule = lastSuccessful()
+                artifactRules = "+:test-results.zip => test-results.zip"
+            }
+        }
 
 //        features {
 //            matrix {
