@@ -21,9 +21,9 @@ project {
     }
 
     sequentialChain {
-//        buildType(Debug)
+        buildType(Debug)
 //        buildType(JvmCompile)
-        buildType(JvmTests)
+//        buildType(JvmTests)
     }
 }
 
@@ -48,12 +48,25 @@ abstract class BaseBuildType : BuildType() {
 object Debug : BaseBuildType() {
     init {
         name = "Debug"
+        artifactRules = """
+            +:/opt/gradle/caches/modules*/**.* => gradle-caches.zip
+            +:/opt/gradle/caches/transforms*/**.* => gradle-caches.zip
+            +:/opt/gradle/caches/jars*/**.* => gradle-caches.zip
+            +:/opt/gradle/caches/*/generated-gradle-jars/**.* => gradle-caches.zip
+            +:/opt/gradle/caches/*/kotlin-dsl/**.* => gradle-caches.zip
+            +:/opt/gradle/caches/*/scripts/**.* => gradle-caches.zip
+        """.trimIndent()
 
         steps {
             script {
                 scriptContent = """
-                    echo "GRADLE_HOME = ${'$'}GRADLE_HOME"
+                    ls /opt/gradle
+                    ls /opt/gradle/caches
                 """.trimIndent()
+            }
+
+            gradle {
+                tasks = ":kotest-extensions:kotest-extensions-spring:compileKotlinJvm"
             }
         }
 
