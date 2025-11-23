@@ -87,10 +87,9 @@ object JvmTests : BaseBuildType() {
             script {
                 name = "Check if the build should run"
                 scriptContent = """
-                    BATCH="%batchNumber%"
-                    FILE="test-results/test-results-${'$'}BATCH.zip"
+                    FILE="test-results/test-results-1.zip"
                     
-                    if [ "${'$'}BATCH" = "1" ]; then
+                    if [ "%batchNumber%" = "1" ]; then
                         echo "Batch 1 detected: Always running (skipping file check)."
                     elif [ -f "${'$'}FILE" ]; then
                         echo "File '${'$'}FILE' found. Proceeding."
