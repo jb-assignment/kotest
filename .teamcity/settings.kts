@@ -83,7 +83,7 @@ object JvmTests : BaseBuildType() {
     init {
         name = "JVM tests"
         artifactRules = """
-            +:**/build/test-results/**/TEST-*.xml => test-results-%batchNumber%.zip
+            +:**/build/test-results/**/TEST-*.xml => test-results-1.zip
             +:%gradle.location%/caches => gradle-caches.zip
         """.trimIndent()
 
