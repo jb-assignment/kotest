@@ -17,8 +17,9 @@ version = "2025.07"
 
 project {
     sequentialChain {
+        buildType(Debug)
 //        buildType(JvmCompile)
-        buildType(JvmTests)
+//        buildType(JvmTests)
     }
 }
 
@@ -52,6 +53,20 @@ object JvmCompile : BaseBuildType() {
 
         params {
             param("env.PUSH_TO_BUILD_CACHE", "true")
+        }
+    }
+}
+
+object Debug : BaseBuildType() {
+    init {
+        name = "Debug"
+
+        steps {
+            script {
+                scriptContent = $$"""
+                    echo "GRADLE_HOME = $GRADLE_HOME"
+                """.trimIndent()
+            }
         }
     }
 }
