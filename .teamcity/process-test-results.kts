@@ -3,14 +3,37 @@ import java.nio.file.FileSystems
 import javax.xml.parsers.DocumentBuilderFactory
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import java.util.LinkedList
+import java.util.Queue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 val testResults = collectTestResults(File("."))
-testResults.map(TestResult::name).forEach(::println)
-println("Precessed ${testResults.size} tests")
+val batches = groupIntoBatches(testResults)
+batches.forEach { (batchNumber, tests) -> println("$batchNumber. tests: ${tests.size}, duration: ${tests.map(TestResult::time).reduce(Duration::plus) }") }
 
-private fun collectTestResults(testResultsDir: File): List<TestResult> {
+fun groupIntoBatches(testResults: List<TestResult>): Map<Int, List<TestResult>> {
+    val numberOfBatches = 10
+    val batches = mutableMapOf<Int, MutableList<TestResult>>()
+    
+    for (i in 1..numberOfBatches) {
+        batches[i] = mutableListOf()
+    }
+
+    val testsByClass = testResults
+        .groupBy { it.classname }
+        .map { (_, tests) -> tests }
+        .sortedByDescending { classTests -> classTests.sumOf { it.time.inWholeMilliseconds } }
+
+    testsByClass.forEach { classTests ->
+        val smallestBatch = batches.minBy { (_, tests) -> tests.sumOf { it.time.inWholeMilliseconds } }
+        smallestBatch.value.addAll(classTests)
+    }
+    
+    return batches
+}
+
+fun collectTestResults(testResultsDir: File): List<TestResult> {
     val pathMatcher = FileSystems.getDefault().getPathMatcher("glob:**/build/test-results/{**,}TEST-*.xml")
 
     return testResultsDir
@@ -20,7 +43,7 @@ private fun collectTestResults(testResultsDir: File): List<TestResult> {
         .toList()
 }
 
-private fun parseXmlTestResults(testResultsFile: File): List<TestResult> {
+fun parseXmlTestResults(testResultsFile: File): List<TestResult> {
     val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testResultsFile)
 
     val testcaseNodes = document.getElementsByTagName("testcase")
@@ -33,22 +56,24 @@ private fun parseXmlTestResults(testResultsFile: File): List<TestResult> {
             val classname = element.getAttribute("classname")
             val name = element.getAttribute("name")
             val time = element.getAttribute("time").toDouble()
-            
+
             val hasFailure = element.getElementsByTagName("failure").length > 0
             val hasSkipped = element.getElementsByTagName("skipped").length > 0
-            
+
             val result = when {
                 hasFailure -> "failed"
                 hasSkipped -> "skipped"
                 else -> "successful"
             }
-            
-            results.add(TestResult(
-                classname = classname,
-                name = name,
-                time = time.seconds,
-                result = result
-            ))
+
+            results.add(
+                TestResult(
+                    classname = classname,
+                    name = name,
+                    time = time.seconds,
+                    result = result
+                )
+            )
         }
     }
 
