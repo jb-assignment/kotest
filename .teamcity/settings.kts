@@ -2,19 +2,24 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.RelativeId
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.buildSteps.kotlinScript
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.matrix
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.sequential
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.ui.add
 import jetbrains.buildServer.configs.kotlin.version
+import java.io.File
 
 version = "2025.07"
 
 project {
     sequentialChain {
 //        buildType(JvmCompile)
+//        buildType(GroupTestsIntoBatches)
         buildType(JvmTests)
     }
 }
@@ -53,10 +58,36 @@ object JvmCompile : BaseBuildType() {
     }
 }
 
+//object GroupTestsIntoBatches : BaseBuildType() {
+//    init {
+//        name = "Group tests into batches"
+//
+//        dependencies {
+//            artifacts(RelativeId("JvmTests")) {
+//                buildRule = lastPinned()
+//                artifactRules = "test-results*.zip => test-results"
+//            }
+//        }
+//
+//        steps {
+//            script {
+//                workingDir = "test-results"
+//                scriptContent = "unzip -o '*.zip'"
+//            }
+//
+//            kotlinScript {
+//                // TODO output batch-1.txt, batch-2.txt, (...) files and upload them as artifacts
+//                content = File("process-test-results.kts").readText()
+//            }
+//        }
+//    }
+//}
+
 object JvmTests : BaseBuildType() {
     init {
-        name = "JVM tests"
-        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results.zip"
+        val batchNumber = DslContext.getParameter("batchNumber")
+        name = "JVM tests $batchNumber"
+        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-$batchNumber.zip"
 
         steps {
             gradle {
@@ -66,7 +97,7 @@ object JvmTests : BaseBuildType() {
 
         features {
             matrix {
-                param("testBatch", (1..10).map(Int::toString).map(::value))
+                param("batchNumber", (1..10).map(Int::toString).map(::value))
             }
         }
 
