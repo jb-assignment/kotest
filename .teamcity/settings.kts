@@ -87,7 +87,7 @@ object JvmTests : BaseBuildType() {
     init {
         name = "JVM tests"
 //        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-$batchNumber.zip"
-        artifactRules = "+:something*.txt => artifacts.zip"
+        artifactRules = "+:something*.txt"
 
         steps {
             script {
