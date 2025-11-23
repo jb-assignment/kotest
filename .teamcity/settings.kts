@@ -27,6 +27,24 @@ fun Project.sequentialChain(block: CompoundStage.() -> Unit) {
     sequential(block).buildTypes().forEach(::buildType)
 }
 
+object Debug : BaseBuildType() {
+    init {
+        name = "Debug"
+
+        steps {
+            script {
+                scriptContent = $$"""
+                    echo "GRADLE_HOME = $GRADLE_HOME"
+                """.trimIndent()
+            }
+        }
+
+        triggers {
+            vcs { }
+        }
+    }
+}
+
 abstract class BaseBuildType : BuildType() {
     init {
         vcs {
@@ -53,20 +71,6 @@ object JvmCompile : BaseBuildType() {
 
         params {
             param("env.PUSH_TO_BUILD_CACHE", "true")
-        }
-    }
-}
-
-object Debug : BaseBuildType() {
-    init {
-        name = "Debug"
-
-        steps {
-            script {
-                scriptContent = $$"""
-                    echo "GRADLE_HOME = $GRADLE_HOME"
-                """.trimIndent()
-            }
         }
     }
 }
