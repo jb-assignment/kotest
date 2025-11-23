@@ -82,7 +82,12 @@ object JvmTests : BaseBuildType() {
         name = "JVM tests"
         artifactRules = """
             +:**/build/test-results/**/TEST-*.xml => test-results-1.zip
-            +:gradle-caches.zip => gradle-caches-1.zip 
+            +:gradle-cache-modules.zip => gradle-cache-modules-1.zip
+            +:gradle-cache-jars.zip => gradle-cache-jars-1.zip
+            +:gradle-cache-transforms.zip => gradle-cache-transforms-1.zip
+            +:gradle-cache-generated-jars.zip => gradle-cache-generated-jars-1.zip
+            +:gradle-cache-kotlin-dsl => gradle-cache-kotlin-1-dsl
+            +:gradle-cache-scripts.zip => gradle-cache-scripts-1.zip
         """.trimIndent()
 
         dependencies {
@@ -147,23 +152,21 @@ object JvmTests : BaseBuildType() {
             script {
                 name = "Pack Gradle Cache"
                 scriptContent = """
-                    OUTPUT_FILE="%teamcity.build.checkoutDir%/gradle-caches.zip"
+                    OUTPUT_DIR="%teamcity.build.checkoutDir%"
                     
                     echo "Zipping caches from ${'$'}HOME/.gradle/caches..."
                     
                     cd ${'$'}HOME/.gradle/caches
                     
-                    zip -r -q "${'$'}OUTPUT_FILE" \
-                        modules* \
-                        jars* \
-                        transforms* \
-                        */generated-gradle-jars \
-                        */kotlin-dsl \
-                        */scripts \
-                        || true
-                        
-                    echo "Zip created successfully:"
-                    ls -l "${'$'}OUTPUT_FILE"
+                    zip -r -q "${'$'}OUTPUT_DIR/gradle-cache-modules.zip" modules* || true
+                    zip -r -q "${'$'}OUTPUT_DIR/gradle-cache-jars.zip" jars* || true
+                    zip -r -q "${'$'}OUTPUT_DIR/gradle-cache-transforms.zip" transforms* || true
+                    zip -r -q "${'$'}OUTPUT_DIR/gradle-cache-generated-jars.zip" */generated-gradle-jars || true
+                    zip -r -q "${'$'}OUTPUT_DIR/gradle-cache-kotlin-dsl.zip" */kotlin-dsl || true
+                    zip -r -q "${'$'}OUTPUT_DIR/gradle-cache-scripts.zip" */scripts || true
+                    
+                    echo "Zipped successfully:"
+                    ls -l gradle-cache*.zip
                 """
             }
         }
