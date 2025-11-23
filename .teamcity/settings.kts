@@ -49,12 +49,12 @@ object Debug : BaseBuildType() {
     init {
         name = "Debug"
         artifactRules = """
-            +:/opt/gradle/caches/modules*/**.* => gradle-caches.zip
-            +:/opt/gradle/caches/transforms*/**.* => gradle-caches.zip
-            +:/opt/gradle/caches/jars*/**.* => gradle-caches.zip
-            +:/opt/gradle/caches/*/generated-gradle-jars/**.* => gradle-caches.zip
-            +:/opt/gradle/caches/*/kotlin-dsl/**.* => gradle-caches.zip
-            +:/opt/gradle/caches/*/scripts/**.* => gradle-caches.zip
+            +:~/.gradle/caches/modules*/**.* => gradle-caches.zip
+            +:~/.gradle/caches/transforms*/**.* => gradle-caches.zip
+            +:~/.gradle/caches/jars*/**.* => gradle-caches.zip
+            +:~/.gradle/caches/*/generated-gradle-jars/**.* => gradle-caches.zip
+            +:~/.gradle/caches/*/kotlin-dsl/**.* => gradle-caches.zip
+            +:~/.gradle/caches/*/scripts/**.* => gradle-caches.zip
         """.trimIndent()
 
         steps {
@@ -64,7 +64,6 @@ object Debug : BaseBuildType() {
 
             script {
                 scriptContent = """
-                    ls ~/.gradle
                     ls ~/.gradle/caches
                 """.trimIndent()
             }
