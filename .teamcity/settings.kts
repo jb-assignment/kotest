@@ -33,8 +33,8 @@ object Debug : BaseBuildType() {
 
         steps {
             script {
-                scriptContent = $$"""
-                    echo "GRADLE_HOME = $GRADLE_HOME"
+                scriptContent = """
+                    echo "GRADLE_HOME = ${'$'}GRADLE_HOME"
                 """.trimIndent()
             }
         }
