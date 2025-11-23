@@ -81,7 +81,7 @@ object JvmTests : BaseBuildType() {
                         echo "File '${'$'}FILE' missing. Skipping build."
                         
                         echo "##teamcity[buildStatus text='Batch skipped']"
-                        echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']
+                        echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']"
                         exit 0
                     fi
                 """.trimIndent()
