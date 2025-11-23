@@ -10,7 +10,13 @@ import kotlin.time.Duration.Companion.seconds
 
 val testResults = collectTestResults(File("."))
 val batches = groupIntoBatches(testResults)
-batches.forEach { (batchNumber, tests) -> println("$batchNumber. tests: ${tests.size}, duration: ${tests.map(TestResult::time).reduce(Duration::plus) }") }
+
+batches.forEach { (batchNumber, tests) ->
+    println("$batchNumber. tests: ${tests.size}, duration: ${tests.map(TestResult::time).reduce(Duration::plus) }")
+
+    val testLines = tests.map { it.classname }.distinct().joinToString("\n")
+    File("batch-$batchNumber.txt").writeText(testLines)
+}
 
 fun groupIntoBatches(testResults: List<TestResult>): Map<Int, List<TestResult>> {
     val numberOfBatches = 10

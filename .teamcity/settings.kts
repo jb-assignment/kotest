@@ -2,7 +2,6 @@ import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.RelativeId
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.buildSteps.kotlinScript
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
@@ -19,8 +18,8 @@ version = "2025.07"
 project {
     sequentialChain {
 //        buildType(JvmCompile)
-//        buildType(GroupTestsIntoBatches)
         buildType(JvmTests)
+        buildType(GroupTestsIntoBatches)
     }
 }
 
@@ -58,48 +57,47 @@ object JvmCompile : BaseBuildType() {
     }
 }
 
-//object GroupTestsIntoBatches : BaseBuildType() {
-//    init {
-//        name = "Group tests into batches"
-//
-//        dependencies {
-//            artifacts(RelativeId("JvmTests")) {
-//                buildRule = lastPinned()
-//                artifactRules = "test-results*.zip => test-results"
-//            }
-//        }
-//
-//        steps {
-//            script {
-//                workingDir = "test-results"
-//                scriptContent = "unzip -o '*.zip'"
-//            }
-//
-//            kotlinScript {
-//                // TODO output batch-1.txt, batch-2.txt, (...) files and upload them as artifacts
-//                content = File("process-test-results.kts").readText()
-//            }
-//        }
-//    }
-//}
-
 object JvmTests : BaseBuildType() {
     init {
         name = "JVM tests"
-//        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-$batchNumber.zip"
-        artifactRules = "+:something*.txt"
+        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-%batchNumber%.zip"
+
+        params {
+            param("env.BATCH_NUMBER", "%batchNumber%")
+        }
 
         steps {
             script {
+                name = "Check if the build should run"
                 scriptContent = """
-                    echo "batchNumber = %batchNumber%"
-                    echo "Something %batchNumber%" > something-%batchNumber%.txt
+                    BATCH="%batchNumber%"
+                    FILE="batches/batch-${'$'}BATCH.txt"
+                    
+                    # Logic: If Batch is 1, run. If file exists, run. Otherwise, skip.
+                    if [ "${'$'}BATCH" = "1" ]; then
+                        echo "Batch 1 detected: Always running (skipping file check)."
+                    elif [ -f "${'$'}FILE" ]; then
+                        echo "File '${'$'}FILE' found. Proceeding."
+                    else
+                        echo "File '${'$'}FILE' missing. Skipping build."
+                        echo "##teamcity[buildStatus text='Skipped: No input file']"
+                        echo "##teamcity[buildStop comment='Input file missing' readdIntoQueue='false']"
+                        exit 0
+                    fi
                 """.trimIndent()
             }
 
-//            gradle {
-//                tasks = "jvmTest"
-//            }
+            gradle {
+                tasks = "jvmTest"
+                gradleParams = "--init-script .teamcity-init-scripts/src/main/kotlin/distributed-tests.init.gradle.kts"
+            }
+        }
+
+        dependencies {
+            artifacts(GroupTestsIntoBatches) {
+                buildRule = lastSuccessful()
+                artifactRules = "batch*.txt => batches"
+            }
         }
 
         features {
@@ -110,6 +108,31 @@ object JvmTests : BaseBuildType() {
 
         triggers {
             vcs { }
+        }
+    }
+}
+
+object GroupTestsIntoBatches : BaseBuildType() {
+    init {
+        name = "Group tests into batches"
+        artifactRules = "+:batch*.txt"
+
+        steps {
+            script {
+                workingDir = "test-results"
+                scriptContent = "unzip -o '*.zip'"
+            }
+
+            kotlinScript {
+                content = File("process-test-results.kts").readText()
+            }
+        }
+
+        dependencies {
+            artifacts(JvmTests) {
+                buildRule = lastSuccessful()
+                artifactRules = "test-results*.zip => test-results"
+            }
         }
     }
 }
