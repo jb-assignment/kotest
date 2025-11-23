@@ -96,7 +96,7 @@ object JvmTests : BaseBuildType() {
         dependencies {
             artifacts(GroupTestsIntoBatches) {
                 buildRule = lastSuccessful()
-                artifactRules = "batch*.txt => batches"
+                artifactRules = "?:batch*.txt => batches"
             }
         }
 
@@ -131,7 +131,7 @@ object GroupTestsIntoBatches : BaseBuildType() {
         dependencies {
             artifacts(JvmTests) {
                 buildRule = lastSuccessful()
-                artifactRules = "test-results*.zip => test-results"
+                artifactRules = "+:test-results*.zip => test-results"
             }
         }
     }
