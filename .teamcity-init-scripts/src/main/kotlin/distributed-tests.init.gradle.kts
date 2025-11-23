@@ -1,5 +1,8 @@
 val batchNumber = System.getenv("BATCH_NUMBER")
-val testsInBatch = batchNumber?.let { File("batches/batch-$batchNumber.txt").readLines() }
+val testsInBatch = batchNumber
+    ?.let { File("batches/batch-$batchNumber.txt") }
+    ?.takeIf(File::exists)
+    ?.readLines()
 
 if (testsInBatch != null) {
     println("Running ${testsInBatch.size} tests from batch $batchNumber")
