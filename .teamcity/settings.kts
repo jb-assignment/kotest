@@ -73,15 +73,15 @@ object JvmTests : BaseBuildType() {
                     BATCH="%batchNumber%"
                     FILE="batches/batch-${'$'}BATCH.txt"
                     
-                    # Logic: If Batch is 1, run. If file exists, run. Otherwise, skip.
                     if [ "${'$'}BATCH" = "1" ]; then
                         echo "Batch 1 detected: Always running (skipping file check)."
                     elif [ -f "${'$'}FILE" ]; then
                         echo "File '${'$'}FILE' found. Proceeding."
                     else
                         echo "File '${'$'}FILE' missing. Skipping build."
-                        echo "##teamcity[buildStatus text='Skipped: No input file']"
-                        echo "##teamcity[buildStop comment='Input file missing' readdIntoQueue='false']"
+                        
+                        echo "##teamcity[buildStatus text='Batch skipped']"
+                        echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']
                         exit 0
                     fi
                 """.trimIndent()
@@ -90,6 +90,10 @@ object JvmTests : BaseBuildType() {
             gradle {
                 tasks = "jvmTest"
                 gradleParams = "--init-script .teamcity-init-scripts/src/main/kotlin/distributed-tests.init.gradle.kts"
+
+                conditions {
+                    doesNotExist("env.SKIP_BUILD")
+                }
             }
         }
 
