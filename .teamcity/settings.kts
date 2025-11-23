@@ -73,7 +73,7 @@ object JvmCompile : BaseBuildType() {
 
         steps {
             gradle {
-                tasks = "assemble"
+                tasks = "compileAllKotlinJvm"
             }
         }
     }
@@ -91,47 +91,47 @@ object JvmTests : BaseBuildType() {
             artifacts(JvmTests) {
                 buildRule = lastSuccessful()
 
-                // +:test-results*.zip => test-results
                 artifactRules = """
+                    +:test-results*.zip => test-results
                     ?:gradle-caches.z* => %env.HOME%/.gradle/caches
                 """.trimIndent()
             }
         }
-//
-//        features {
-//            matrix {
-//                param("batchNumber", (1..10).map { value(it.toString()) })
-//            }
-//        }
-//
-//        params {
-//            param("env.BATCH_NUMBER", "%batchNumber%")
-//        }
+
+        features {
+            matrix {
+                param("batchNumber", (1..10).map { value(it.toString()) })
+            }
+        }
+
+        params {
+            param("env.BATCH_NUMBER", "%batchNumber%")
+        }
 
         steps {
-//            script {
-//                workingDir = "test-results"
-//                scriptContent = "unzip -o '*.zip'"
-//            }
-//
-//            script {
-//                name = "Check if the build should run"
-//                scriptContent = """
-//                    FILE="test-results/test-results-1.zip"
-//
-//                    if [ "%batchNumber%" = "1" ]; then
-//                        echo "Batch 1 detected: Always running (skipping file check)."
-//                    elif [ -f "${'$'}FILE" ]; then
-//                        echo "File '${'$'}FILE' found. Proceeding."
-//                    else
-//                        echo "File '${'$'}FILE' missing. Skipping build."
-//
-//                        echo "##teamcity[buildStatus text='Batch skipped']"
-//                        echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']"
-//                        exit 0
-//                    fi
-//                """.trimIndent()
-//            }
+            script {
+                workingDir = "test-results"
+                scriptContent = "unzip -o '*.zip'"
+            }
+
+            script {
+                name = "Check if the build should run"
+                scriptContent = """
+                    FILE="test-results/test-results-1.zip"
+
+                    if [ "%batchNumber%" = "1" ]; then
+                        echo "Batch 1 detected: Always running (skipping file check)."
+                    elif [ -f "${'$'}FILE" ]; then
+                        echo "File '${'$'}FILE' found. Proceeding."
+                    else
+                        echo "File '${'$'}FILE' missing. Skipping build."
+
+                        echo "##teamcity[buildStatus text='Batch skipped']"
+                        echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']"
+                        exit 0
+                    fi
+                """.trimIndent()
+            }
 
             script {
                 workingDir = "%env.HOME%/.gradle/caches"
@@ -139,14 +139,14 @@ object JvmTests : BaseBuildType() {
                     zip -s 0 gradle-caches.zip --out merged-gradle-caches.zip 
                     unzip merged-gradle-caches.zip
                 """
+
+                conditions { doesNotExist("env.SKIP_BUILD") }
             }
 
             gradle {
                 tasks = "jvmTest"
 
-                conditions {
-                    doesNotExist("env.SKIP_BUILD")
-                }
+                conditions { doesNotExist("env.SKIP_BUILD") }
             }
 
             script {
@@ -166,10 +166,9 @@ object JvmTests : BaseBuildType() {
                         */kotlin-dsl \
                         */scripts \
                         || true
-                        
-                    echo "Zip created successfully:"
-                    ls -l "%teamcity.build.checkoutDir%/gradle-caches*"
                 """
+
+                conditions { doesNotExist("env.SKIP_BUILD") }
             }
         }
 
