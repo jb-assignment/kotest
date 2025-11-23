@@ -9,7 +9,7 @@ import kotlin.time.Duration.Companion.seconds
 val batchNumber = System.getenv("BATCH_NUMBER")?.toInt()
 val testResults = collectTestResults(rootProject.projectDir.resolve("test-results"))
 val batches = groupIntoBatches(testResults)
-val myBatch = batchNumber?.let { batches[it] }
+val myBatch = batchNumber?.let { batches[it] }?.takeIf { it.isNotEmpty() }
 
 if (myBatch != null) {
     logger.lifecycle("Found ${testResults.size} tests")
