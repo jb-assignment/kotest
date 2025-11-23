@@ -59,13 +59,13 @@ object Debug : BaseBuildType() {
 
         steps {
             gradle {
-                tasks = ":kotest-extensions:kotest-extensions-spring:compileKotlinJvm"
+                tasks = ":kotest-common:compileKotlinJvm"
             }
 
             script {
                 scriptContent = """
-                    ls /opt/gradle
-                    ls /opt/gradle/caches
+                    ls ~/.gradle
+                    ls ~/.gradle/caches
                 """.trimIndent()
             }
         }
