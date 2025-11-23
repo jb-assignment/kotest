@@ -49,12 +49,7 @@ object Debug : BaseBuildType() {
     init {
         name = "Debug"
         artifactRules = """
-            ?:%env.HOME%/.gradle/caches/modules*/** => gradle-caches.zip
-            ?:%env.HOME%/.gradle/caches/transforms*/** => gradle-caches.zip
-            ?:%env.HOME%/.gradle/caches/jars*/** => gradle-caches.zip
-            ?:%env.HOME%/.gradle/caches/*/generated-gradle-jars/** => gradle-caches.zip
-            ?:%env.HOME%/.gradle/caches/*/kotlin-dsl/** => gradle-caches.zip
-            ?:%env.HOME%/.gradle/caches/*/scripts/** => gradle-caches.zip
+            ?:%env.HOME%/.gradle/caches => gradle-caches.zip
         """.trimIndent()
 
         steps {
