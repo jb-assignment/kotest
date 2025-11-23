@@ -48,11 +48,8 @@ abstract class BaseBuildType : BuildType() {
 object Debug : BaseBuildType() {
     init {
         name = "Debug"
-        artifactRules = """
-            ?:local_cache_link/modules*/** => gradle-caches.zip!/modules
-            ?:local_cache_link/jars*/** => gradle-caches.zip!/jars
-            ?:local_cache_link/transforms*/** => gradle-caches.zip!/transforms
-        """.trimIndent()
+        artifactRules = "gradle-caches.tar.gz"
+
 
         steps {
             gradle {
@@ -60,10 +57,28 @@ object Debug : BaseBuildType() {
             }
 
             script {
+                name = "Pack Gradle Cache"
                 scriptContent = """
-                    ls %env.HOME%/.gradle/caches
-                    ln -s %env.HOME%/.gradle/caches local_cache_link
-                """.trimIndent()
+                # Define output inside the Checkout Directory
+                OUTPUT="gradle-caches.tar.gz"
+                
+                echo "Packing caches from ${'$'}HOME/.gradle/caches..."
+                
+                # -C changes directory to the cache root so the archive structure is clean
+                # We explicitly list the wildcards here. The SHELL expands them, not TeamCity.
+                # '|| true' ensures the build doesn't fail if optional folders (like transforms) are missing.
+                
+                tar -czf "${'$'}OUTPUT" \
+                    -C "${'$'}HOME/.gradle/caches" \
+                    modules-2 \
+                    jars-9 \
+                    transforms* \
+                    */generated-gradle-jars \
+                    */kotlin-dsl \
+                    || true
+                    
+                echo "Created ${'$'}OUTPUT"
+            """
             }
         }
 
