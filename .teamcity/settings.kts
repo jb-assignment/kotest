@@ -49,17 +49,20 @@ object Debug : BaseBuildType() {
     init {
         name = "Debug"
         artifactRules = """
-            ?:%env.HOME%/.gradle/caches => gradle-caches.zip
+            ?:local_cache_link/modules*/** => gradle-caches.zip!/modules
+            ?:local_cache_link/jars*/** => gradle-caches.zip!/jars
+            ?:local_cache_link/transforms*/** => gradle-caches.zip!/transforms
         """.trimIndent()
 
         steps {
             gradle {
-                tasks = ":kotest-common:compileKotlinJvm"
+                tasks = "assemble"
             }
 
             script {
                 scriptContent = """
-                    ls ~/.gradle/caches
+                    ls %env.HOME%/.gradle/caches
+                    ln -s %env.HOME%/.gradle/caches local_cache_link
                 """.trimIndent()
             }
         }
