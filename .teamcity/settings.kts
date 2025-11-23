@@ -92,6 +92,7 @@ object JvmTests : BaseBuildType() {
 
         steps {
             script {
+                val batchNumber = DslContext.getParameter("batchNumber")
                 scriptContent = """
                     echo "batchNumber = $batchNumber"
                     echo "Something $batchNumber" > something-$batchNumber.txt
