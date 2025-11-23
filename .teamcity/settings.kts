@@ -168,7 +168,7 @@ object JvmTests : BaseBuildType() {
                         || true
                         
                     echo "Zip created successfully:"
-                    ls -l "%teamcity.build.checkoutDir%/gradle-caches.z*"
+                    ls -l "%teamcity.build.checkoutDir%/gradle-caches*"
                 """
             }
         }
