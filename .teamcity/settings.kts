@@ -85,17 +85,15 @@ object JvmCompile : BaseBuildType() {
 
 object JvmTests : BaseBuildType() {
     init {
-        val batchNumber = DslContext.getParameter("batchNumber")
         name = "JVM tests"
 //        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-$batchNumber.zip"
-        artifactRules = "+:something*.txt => artifacts-$batchNumber.zip"
+        artifactRules = "+:something*.txt => artifacts.zip"
 
         steps {
             script {
-                val batchNumber = DslContext.getParameter("batchNumber")
                 scriptContent = """
-                    echo "batchNumber = $batchNumber"
-                    echo "Something $batchNumber" > something-$batchNumber.txt
+                    echo "batchNumber = %batchNumber%"
+                    echo "Something %batchNumber%" > something-%batchNumber%.txt
                 """.trimIndent()
             }
 
@@ -106,7 +104,7 @@ object JvmTests : BaseBuildType() {
 
         features {
             matrix {
-                param("batchNumber", (1..10).map(Int::toString).map(::value))
+                param("batchNumber", (1..10).map { value(it.toString()) })
             }
         }
 
