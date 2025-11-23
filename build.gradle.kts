@@ -3,29 +3,10 @@ import utils.configureGradleDaemonJvm
 plugins {
    id("kotest-base")
    id("com.gradleup.nmcp.aggregation")
+   id("distributed-tests")
    java
    alias(libs.plugins.kotlinBinaryCompatibilityValidator)
    //TODO this fails. why?? alias(libs.plugins.android.library) apply false
-}
-
-allprojects {
-   tasks.register("compileAllKotlinJvm") {
-      project.tasks
-         .filter { it.name in listOf("compileKotlinJvm", "compileTestKotlinJvm") }
-         .forEach(::dependsOn)
-   }
-}
-
-gradle.projectsEvaluated {
-   allprojects {
-      tasks.withType<Test>().configureEach {
-         val correctedExcludePatterns = filter.excludePatterns
-            .map { if (it.endsWith(".*")) it.removeSuffix(".*") + "*" else it }
-            .toTypedArray()
-
-         filter.setExcludePatterns(*correctedExcludePatterns)
-      }
-   }
 }
 
 apiValidation {

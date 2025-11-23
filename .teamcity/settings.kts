@@ -19,7 +19,6 @@ project {
     sequentialChain {
 //        buildType(JvmCompile)
         buildType(JvmTests)
-        buildType(GroupTestsIntoBatches)
     }
 }
 
@@ -47,7 +46,7 @@ object JvmCompile : BaseBuildType() {
 
         steps {
             gradle {
-                tasks = "compileAllKotlinJvm"
+                tasks = "assemble"
             }
         }
 
@@ -62,16 +61,34 @@ object JvmTests : BaseBuildType() {
         name = "JVM tests"
         artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-%batchNumber%.zip"
 
+        dependencies {
+            artifacts(JvmTests) {
+                buildRule = lastSuccessful()
+                artifactRules = "+:test-results*.zip => test-results"
+            }
+        }
+
+        features {
+            matrix {
+                param("batchNumber", (1..10).map { value(it.toString()) })
+            }
+        }
+
         params {
             param("env.BATCH_NUMBER", "%batchNumber%")
         }
 
         steps {
             script {
+                workingDir = "test-results"
+                scriptContent = "unzip -o '*.zip'"
+            }
+
+            script {
                 name = "Check if the build should run"
                 scriptContent = """
                     BATCH="%batchNumber%"
-                    FILE="batches/batch-${'$'}BATCH.txt"
+                    FILE="test-results/test-results-${'$'}BATCH.zip"
                     
                     if [ "${'$'}BATCH" = "1" ]; then
                         echo "Batch 1 detected: Always running (skipping file check)."
@@ -89,7 +106,6 @@ object JvmTests : BaseBuildType() {
 
             gradle {
                 tasks = "jvmTest"
-                gradleParams = "--init-script .teamcity-init-scripts/src/main/kotlin/distributed-tests.init.gradle.kts"
 
                 conditions {
                     doesNotExist("env.SKIP_BUILD")
@@ -97,46 +113,8 @@ object JvmTests : BaseBuildType() {
             }
         }
 
-        dependencies {
-            artifacts(GroupTestsIntoBatches) {
-                buildRule = lastSuccessful()
-                artifactRules = "?:batch*.txt => batches"
-            }
-        }
-
-        features {
-            matrix {
-                param("batchNumber", (1..10).map { value(it.toString()) })
-            }
-        }
-
         triggers {
             vcs { }
-        }
-    }
-}
-
-object GroupTestsIntoBatches : BaseBuildType() {
-    init {
-        name = "Group tests into batches"
-        artifactRules = "+:batch*.txt"
-
-        steps {
-            script {
-                workingDir = "test-results"
-                scriptContent = "unzip -o '*.zip'"
-            }
-
-            kotlinScript {
-                content = File("process-test-results.kts").readText()
-            }
-        }
-
-        dependencies {
-            artifacts(JvmTests) {
-                buildRule = lastSuccessful()
-                artifactRules = "+:test-results*.zip => test-results"
-            }
         }
     }
 }
