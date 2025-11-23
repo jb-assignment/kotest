@@ -21,9 +21,9 @@ project {
     }
 
     sequentialChain {
-        buildType(Debug)
+//        buildType(Debug)
 //        buildType(JvmCompile)
-//        buildType(JvmTests)
+        buildType(JvmTests)
     }
 }
 
@@ -48,35 +48,10 @@ abstract class BaseBuildType : BuildType() {
 object Debug : BaseBuildType() {
     init {
         name = "Debug"
-        artifactRules = "gradle-caches.zip"
-
 
         steps {
             gradle {
                 tasks = "assemble"
-            }
-
-            script {
-                name = "Pack Gradle Cache"
-                scriptContent = """
-                    OUTPUT_FILE="%teamcity.build.checkoutDir%/gradle-caches.zip"
-                    
-                    echo "Zipping caches from ${'$'}HOME/.gradle/caches..."
-                    
-                    cd ${'$'}HOME/.gradle/caches
-                    
-                    zip -r -q "${'$'}OUTPUT_FILE" \
-                        modules* \
-                        jars* \
-                        transforms* \
-                        */generated-gradle-jars \
-                        */kotlin-dsl \
-                        */scripts \
-                        || true
-                        
-                    echo "Zip created successfully:"
-                    ls -lh "${'$'}OUTPUT_FILE"
-                """
             }
         }
 
@@ -107,19 +82,19 @@ object JvmTests : BaseBuildType() {
         name = "JVM tests"
         artifactRules = """
             +:**/build/test-results/**/TEST-*.xml => test-results-1.zip
-            +:%gradle.location%/caches => gradle-caches.zip
+            +:gradle-caches.zip => gradle-caches-1.zip 
         """.trimIndent()
 
-//        dependencies {
-//            artifacts(JvmTests) {
-//                buildRule = lastSuccessful()
-//
-//                // +:test-results*.zip => test-results
-//                artifactRules = """
-//                    ?:gradle-caches-%batchNumber%.zip =>
-//                """.trimIndent()
-//            }
-//        }
+        dependencies {
+            artifacts(JvmTests) {
+                buildRule = lastSuccessful()
+
+                // +:test-results*.zip => test-results
+                artifactRules = """
+                    ?:gradle-caches*.zip => %env.HOME%/.gradle/caches
+                """.trimIndent()
+            }
+        }
 //
 //        features {
 //            matrix {
@@ -156,12 +131,40 @@ object JvmTests : BaseBuildType() {
 //                """.trimIndent()
 //            }
 
+            script {
+                workingDir = "%env.HOME%/.gradle/caches"
+                scriptContent = "unzip -o '*.zip'"
+            }
+
             gradle {
                 tasks = "jvmTest"
 
                 conditions {
                     doesNotExist("env.SKIP_BUILD")
                 }
+            }
+
+            script {
+                name = "Pack Gradle Cache"
+                scriptContent = """
+                    OUTPUT_FILE="%teamcity.build.checkoutDir%/gradle-caches.zip"
+                    
+                    echo "Zipping caches from ${'$'}HOME/.gradle/caches..."
+                    
+                    cd ${'$'}HOME/.gradle/caches
+                    
+                    zip -r -q "${'$'}OUTPUT_FILE" \
+                        modules* \
+                        jars* \
+                        transforms* \
+                        */generated-gradle-jars \
+                        */kotlin-dsl \
+                        */scripts \
+                        || true
+                        
+                    echo "Zip created successfully:"
+                    ls -l "${'$'}OUTPUT_FILE"
+                """
             }
         }
 
