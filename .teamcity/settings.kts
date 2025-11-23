@@ -86,13 +86,21 @@ object JvmCompile : BaseBuildType() {
 object JvmTests : BaseBuildType() {
     init {
         val batchNumber = DslContext.getParameter("batchNumber")
-        name = "JVM tests $batchNumber"
-        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-$batchNumber.zip"
+        name = "JVM tests"
+//        artifactRules = "+:**/build/test-results/**/TEST-*.xml => test-results-$batchNumber.zip"
+        artifactRules = "+:something*.txt => artifacts-$batchNumber.zip"
 
         steps {
-            gradle {
-                tasks = "jvmTest"
+            script {
+                scriptContent = """
+                    echo "batchNumber = $batchNumber"
+                    echo "Something $batchNumber" > something-$batchNumber.txt
+                """.trimIndent()
             }
+
+//            gradle {
+//                tasks = "jvmTest"
+//            }
         }
 
         features {
