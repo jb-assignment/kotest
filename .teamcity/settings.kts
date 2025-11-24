@@ -92,7 +92,7 @@ object JvmTests : BaseBuildType() {
 
                 artifactRules = """
                     +:test-results*.zip => test-results
-                    ?:configuration-cache-%batchNumber%.zip!/.gradle/configuration-cache => .gradle/configuration-cache 
+                    +:configuration-cache-%batchNumber%.zip!/** => .gradle/configuration-cache 
                     ?:gradle-caches.z* => %env.HOME%/.gradle/caches
                 """.trimIndent()
             }
