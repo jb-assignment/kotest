@@ -7,6 +7,7 @@ import kotlin.time.Duration.Companion.seconds
 
 // TODO move it to task? or build service? or something?
 val batchNumber = System.getenv("BATCH_NUMBER")?.toInt()
+val numberOfBatches = System.getenv("NUMBER_OF_BATCHES")?.toInt() ?: 1
 val testResults = collectTestResults(rootProject.projectDir.resolve("test-results"))
 val batches = groupIntoBatches(testResults)
 val myBatch = batchNumber?.let { batches[it] }?.takeIf { it.isNotEmpty() }
@@ -78,7 +79,6 @@ fun parseXmlTestResults(testResultsFile: File): List<TestResult> {
 }
 
 fun groupIntoBatches(testResults: List<TestResult>): Map<Int, List<TestResult>> {
-    val numberOfBatches = 10
     val batches = mutableMapOf<Int, MutableList<TestResult>>()
 
     for (i in 1..numberOfBatches) {

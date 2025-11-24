@@ -104,6 +104,7 @@ object JvmTests : BaseBuildType() {
 
         params {
             param("env.BATCH_NUMBER", "%batchNumber%")
+            param("env.NUMBER_OF_BATCHES", "1")
         }
 
         steps {
