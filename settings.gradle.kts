@@ -52,7 +52,7 @@ plugins {
 buildCache {
    remote<HttpBuildCache> {
       url = uri("https://build-cache-node-hv2u6plrda-ew.a.run.app/cache")
-      isPush = true // System.getenv().containsKey("TEAMCITY_VERSION") && System.getenv("PUSH_TO_BUILD_CACHE") == "true"
+      isPush = System.getenv().containsKey("TEAMCITY_VERSION") && System.getenv("PUSH_TO_BUILD_CACHE") == "true"
    }
 }
 
@@ -137,7 +137,7 @@ if (System.getenv("CI") != "true" || System.getenv("RUNNER_OS") == "Linux") {
       ":kotest-assertions:kotest-assertions-compiler",
 
       // adds support for the allure reporting framework - see more https://allurereport.org/
-      ":kotest-extensions:kotest-extensions-allure",
+//      ":kotest-extensions:kotest-extensions-allure",
       ":kotest-extensions:kotest-extensions-blockhound",
 
       // adds support for coroutine decoroutinator - see more https://github.com/Anamorphosee/stacktrace-decoroutinator

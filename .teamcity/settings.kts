@@ -3,7 +3,6 @@ import jetbrains.buildServer.configs.kotlin.CompoundStage
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
-import jetbrains.buildServer.configs.kotlin.buildSteps.kotlinScript
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.matrix
 import jetbrains.buildServer.configs.kotlin.project
@@ -11,7 +10,6 @@ import jetbrains.buildServer.configs.kotlin.sequential
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.ui.add
 import jetbrains.buildServer.configs.kotlin.version
-import java.io.File
 
 version = "2025.07"
 
@@ -100,7 +98,7 @@ object JvmTests : BaseBuildType() {
 
         features {
             matrix {
-                param("batchNumber", (1..10).map { value(it.toString()) })
+                param("batchNumber", (1..1).map { value(it.toString()) })
             }
         }
 
@@ -147,6 +145,11 @@ object JvmTests : BaseBuildType() {
                 tasks = "jvmTest"
 
                 conditions { doesNotExist("env.SKIP_BUILD") }
+            }
+
+            script {
+                name = "Clear previous test results"
+                scriptContent = "rm -rf test-results"
             }
 
             script {

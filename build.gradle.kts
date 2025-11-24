@@ -93,7 +93,7 @@ dependencies {
    if (System.getenv("CI") != "true" || System.getenv("RUNNER_OS") == "Linux") {
       nmcpAggregation(project(":kotest-assertions:kotest-assertions-compiler"))
 
-      nmcpAggregation(project(":kotest-extensions:kotest-extensions-allure"))
+//      nmcpAggregation(project(":kotest-extensions:kotest-extensions-allure"))
       nmcpAggregation(project(":kotest-extensions:kotest-extensions-blockhound"))
       nmcpAggregation(project(":kotest-extensions:kotest-extensions-decoroutinator"))
       nmcpAggregation(project(":kotest-extensions:kotest-extensions-junit5"))
