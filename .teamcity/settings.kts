@@ -113,75 +113,71 @@ object JvmTests : BaseBuildType() {
 
         steps {
             script {
-                scriptContent = "ls .gradle/configuration-cache"
+                workingDir = "test-results"
+                scriptContent = "unzip -o '*.zip'"
             }
 
-//            script {
-//                workingDir = "test-results"
-//                scriptContent = "unzip -o '*.zip'"
-//            }
-//
-//            script {
-//                name = "Check if the build should run"
-//                scriptContent = """
-//                    FILE="test-results/test-results-1.zip"
-//
-//                    if [ "%batchNumber%" = "1" ]; then
-//                        echo "Batch 1 detected: Always running (skipping file check)."
-//                    elif [ -f "${'$'}FILE" ]; then
-//                        echo "File '${'$'}FILE' found. Proceeding."
-//                    else
-//                        echo "File '${'$'}FILE' missing. Skipping build."
-//
-//                        echo "##teamcity[buildStatus text='Batch skipped']"
-//                        echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']"
-//                        exit 0
-//                    fi
-//                """.trimIndent()
-//            }
-//
-//            script {
-//                workingDir = "%env.HOME%/.gradle/caches"
-//                scriptContent = """
-//                    zip -s 0 gradle-caches.zip --out merged-gradle-caches.zip
-//                    unzip merged-gradle-caches.zip
-//                """
-//
-//                conditions { doesNotExist("env.SKIP_BUILD") }
-//            }
-//
-//            gradle {
-//                tasks = "jvmTest"
-//
-//                conditions { doesNotExist("env.SKIP_BUILD") }
-//            }
-//
-//            script {
-//                name = "Clear previous test results"
-//                scriptContent = "rm -rf test-results"
-//            }
-//
-//            script {
-//                name = "Pack Gradle Cache"
-//                scriptContent = """
-//                    OUTPUT_FILE="%teamcity.build.checkoutDir%/gradle-caches.zip"
-//
-//                    echo "Zipping caches from ${'$'}HOME/.gradle/caches..."
-//
-//                    cd ${'$'}HOME/.gradle/caches
-//
-//                    zip -r -q -s 250m "${'$'}OUTPUT_FILE" \
-//                        modules* \
-//                        jars* \
-//                        transforms* \
-//                        */generated-gradle-jars \
-//                        */kotlin-dsl \
-//                        */scripts \
-//                        || true
-//                """
-//
-//                conditions { doesNotExist("env.SKIP_BUILD") }
-//            }
+            script {
+                name = "Check if the build should run"
+                scriptContent = """
+                    FILE="test-results/test-results-1.zip"
+
+                    if [ "%batchNumber%" = "1" ]; then
+                        echo "Batch 1 detected: Always running (skipping file check)."
+                    elif [ -f "${'$'}FILE" ]; then
+                        echo "File '${'$'}FILE' found. Proceeding."
+                    else
+                        echo "File '${'$'}FILE' missing. Skipping build."
+
+                        echo "##teamcity[buildStatus text='Batch skipped']"
+                        echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']"
+                        exit 0
+                    fi
+                """.trimIndent()
+            }
+
+            script {
+                workingDir = "%env.HOME%/.gradle/caches"
+                scriptContent = """
+                    zip -s 0 gradle-caches.zip --out merged-gradle-caches.zip 
+                    unzip merged-gradle-caches.zip
+                """
+
+                conditions { doesNotExist("env.SKIP_BUILD") }
+            }
+
+            gradle {
+                tasks = "jvmTest"
+
+                conditions { doesNotExist("env.SKIP_BUILD") }
+            }
+
+            script {
+                name = "Clear previous test results"
+                scriptContent = "rm -rf test-results"
+            }
+
+            script {
+                name = "Pack Gradle Cache"
+                scriptContent = """
+                    OUTPUT_FILE="%teamcity.build.checkoutDir%/gradle-caches.zip"
+                    
+                    echo "Zipping caches from ${'$'}HOME/.gradle/caches..."
+                    
+                    cd ${'$'}HOME/.gradle/caches
+                    
+                    zip -r -q -s 250m "${'$'}OUTPUT_FILE" \
+                        modules* \
+                        jars* \
+                        transforms* \
+                        */generated-gradle-jars \
+                        */kotlin-dsl \
+                        */scripts \
+                        || true
+                """
+
+                conditions { doesNotExist("env.SKIP_BUILD") }
+            }
         }
 
         triggers {
