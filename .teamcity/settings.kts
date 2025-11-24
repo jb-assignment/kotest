@@ -82,6 +82,7 @@ object JvmTests : BaseBuildType() {
         name = "JVM tests"
         artifactRules = """
             +:**/build/test-results/**/TEST-*.xml => test-results-%batchNumber%.zip
+            +:.gradle/configuration-cache/** => configuration-cache-%batchNumber%.zip
             +:gradle-caches.z* 
         """.trimIndent()
 
@@ -91,20 +92,23 @@ object JvmTests : BaseBuildType() {
 
                 artifactRules = """
                     +:test-results*.zip => test-results
+                    ?:configuration-cache-%batchNumber%.zip!/.gradle/configuration-cache => .gradle/configuration-cache 
                     ?:gradle-caches.z* => %env.HOME%/.gradle/caches
                 """.trimIndent()
             }
         }
 
+        val numberOfBatches = 1
+
         features {
             matrix {
-                param("batchNumber", (1..1).map { value(it.toString()) })
+                param("batchNumber", (1..numberOfBatches).map { value(it.toString()) })
             }
         }
 
         params {
             param("env.BATCH_NUMBER", "%batchNumber%")
-            param("env.NUMBER_OF_BATCHES", "1")
+            param("env.NUMBER_OF_BATCHES", "$numberOfBatches")
         }
 
         steps {
