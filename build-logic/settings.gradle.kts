@@ -1,4 +1,4 @@
-rootProject.name = "buildSrc"
+rootProject.name = "build-logic"
 
 pluginManagement {
    repositories {
@@ -20,3 +20,5 @@ dependencyResolutionManagement {
       }
    }
 }
+
+include("distributed-tests")

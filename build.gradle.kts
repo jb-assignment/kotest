@@ -2,10 +2,10 @@ import utils.configureGradleDaemonJvm
 
 plugins {
    id("kotest-base")
-   id("com.gradleup.nmcp.aggregation")
    id("distributed-tests")
    java
    alias(libs.plugins.kotlinBinaryCompatibilityValidator)
+   alias(libs.plugins.nmcpAggregation)
    //TODO this fails. why?? alias(libs.plugins.android.library) apply false
 }
 

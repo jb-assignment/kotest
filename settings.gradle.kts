@@ -56,6 +56,8 @@ buildCache {
    }
 }
 
+includeBuild("build-logic")
+
 include(
    ":kotest-common",
 
