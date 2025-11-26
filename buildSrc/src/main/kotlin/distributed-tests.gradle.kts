@@ -1,5 +1,6 @@
 import org.w3c.dom.Element
 import org.w3c.dom.Node
+import java.io.Serializable
 import java.nio.file.FileSystems
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.time.Duration
@@ -11,23 +12,16 @@ val numberOfBatches = System.getenv("NUMBER_OF_BATCHES")?.toInt() ?: 1
 val testResults = collectTestResults(rootProject.projectDir.resolve("test-results"))
 val batches = groupIntoBatches(testResults)
 val myBatch = batchNumber?.let { batches[it] }?.takeIf { it.isNotEmpty() }
-
-if (myBatch != null) {
-    logger.lifecycle("Found ${testResults.size} tests")
-
-    val batchesString = batches.entries.joinToString(separator = "\n") { (number, batch) ->
-        "$number. tests = ${batch.size}, total duration = ${batch.map(TestResult::time).reduce(Duration::plus)}"
-    }
-    logger.lifecycle("Grouped them into batches:")
-    logger.lifecycle(batchesString)
-    logger.lifecycle("Running ${myBatch.size} tests from batch $batchNumber")
-} else {
-    logger.lifecycle("Running all tests")
-}
+logTestBatches()
 
 allprojects {
     tasks.withType<Test>().configureEach {
-        myBatch?.forEach { filter.includeTestsMatching("${it.classname}*") }
+        inputs.property("myBatch", myBatch)
+
+        doFirst {
+            val myBatch = inputs.properties["myBatch"] as List<TestResult>?
+            myBatch?.forEach { filter.includeTestsMatching("${it.classname}*") }
+        }
     }
 }
 
@@ -98,9 +92,24 @@ fun groupIntoBatches(testResults: List<TestResult>): Map<Int, List<TestResult>> 
     return batches
 }
 
+fun logTestBatches() {
+    if (myBatch != null) {
+        logger.lifecycle("Found ${testResults.size} tests")
+
+        val batchesString = batches.entries.joinToString(separator = "\n") { (number, batch) ->
+            "$number. tests = ${batch.size}, total duration = ${batch.map(TestResult::time).reduce(Duration::plus)}"
+        }
+        logger.lifecycle("Grouped them into batches:")
+        logger.lifecycle(batchesString)
+        logger.lifecycle("Running ${myBatch.size} tests from batch $batchNumber")
+    } else {
+        logger.lifecycle("Running all tests")
+    }
+}
+
 data class TestResult(
     val name: String,
     val classname: String,
     val time: Duration,
     val result: String,
-)
+) : Serializable
