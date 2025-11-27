@@ -1,8 +1,4 @@
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinFeature.UseJavaDurationConversion
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -12,7 +8,6 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.NAME_ONLY
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
-import org.gradle.work.DisableCachingByDefault
 
 @CacheableTask
 abstract class PrepareExcludeTestPatterns : DefaultTask() {
@@ -58,11 +53,5 @@ abstract class PrepareExcludeTestPatterns : DefaultTask() {
         val currentBatch = batches.find { it.number == batchNumber.get() }
         val testCount = currentBatch?.tests?.size ?: 0
         logger.lifecycle("Running $testCount tests from batch ${batchNumber.get()} + any tests recently added")
-    }
-
-    companion object {
-        private val objectMapper = ObjectMapper()
-            .registerKotlinModule { enable(UseJavaDurationConversion) }
-            .registerModule(JavaTimeModule())
     }
 }
