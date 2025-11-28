@@ -15,7 +15,8 @@ object JvmTests : BaseBuildType() {
         artifactRules = """
             +:**/build/test-results/**/TEST-*.xml => test-results-%batchNumber%.zip
             +:.gradle/configuration-cache/** => configuration-cache-%batchNumber%.zip
-            +:gradle-caches.z* 
+            +:gradle-caches.z*
+            +:build/reports/configuration-cache/** => config-cache-report.zip
         """.trimIndent()
 
         dependencies {
@@ -44,6 +45,10 @@ object JvmTests : BaseBuildType() {
         }
 
         steps {
+            script {
+                scriptContent = "ls /.gradle/configuration-cache"
+            }
+
             unpackTestResults()
 
             ifDoesNotExist("env.SKIP_BUILD") {
