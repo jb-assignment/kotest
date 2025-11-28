@@ -109,7 +109,7 @@ private data class TestClass(
 
 private class MutableTestBatch(val number: Int) {
     private val tests = mutableListOf<TestResult>()
-    val totalDuration = tests.totalDuration()
+    val totalDuration get() = tests.totalDuration()
 
     fun addTests(test: List<TestResult>) {
         tests.addAll(test)
@@ -119,4 +119,4 @@ private class MutableTestBatch(val number: Int) {
 }
 
 private fun List<TestResult>.totalDuration() =
-    map(TestResult::duration).reduce(Duration::plus)
+    map(TestResult::duration).fold(Duration.ZERO, Duration::plus)
