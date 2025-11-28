@@ -28,10 +28,15 @@ object JvmTests : BaseBuildType() {
             }
         }
 
-        val numberOfBatches = 1
+        val numberOfBatches = 5
+
+        features {
+            matrix {
+                param("batchNumber", (1..numberOfBatches).map { value(it.toString()) })
+            }
+        }
 
         params {
-            param("batchNumber", "1")
             param("env.BATCH_NUMBER", "%batchNumber%")
             param("env.NUMBER_OF_BATCHES", "$numberOfBatches")
         }
@@ -44,7 +49,6 @@ object JvmTests : BaseBuildType() {
 
                 gradle {
                     tasks = "jvmTest"
-                    gradleParams = "--dry-run"
                 }
 
                 script {
