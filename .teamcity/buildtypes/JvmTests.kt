@@ -14,9 +14,7 @@ object JvmTests : BaseBuildType() {
         name = "JVM tests"
         artifactRules = """
             +:**/build/test-results/**/TEST-*.xml => test-results-%batchNumber%.zip
-            +:.gradle/configuration-cache/** => configuration-cache-%batchNumber%.zip
             +:gradle-caches.z*
-            +:build/reports/configuration-cache/** => config-cache-report.zip
         """.trimIndent()
 
         dependencies {
@@ -52,15 +50,6 @@ object JvmTests : BaseBuildType() {
                 gradle {
                     tasks = "jvmTest"
                     gradleParams = "--dry-run"
-                }
-
-                gradle {
-                    tasks = "jvmTest"
-                    gradleParams = "--dry-run"
-                }
-
-                script {
-                    scriptContent = "ls .gradle/configuration-cache"
                 }
 
                 script {
