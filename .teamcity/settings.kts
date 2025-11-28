@@ -79,6 +79,7 @@ object JvmTests : BaseBuildType() {
 
         steps {
             script {
+                name = "Unpack test results"
                 workingDir = "test-results"
                 scriptContent = "unzip -o '*.zip' || true"
             }
@@ -103,10 +104,12 @@ object JvmTests : BaseBuildType() {
             }
 
             script {
+                name = "Unpack Gradle caches"
                 workingDir = "%env.HOME%/.gradle/caches"
                 scriptContent = """
-                    zip -s 0 gradle-caches.zip --out merged-gradle-caches.zip 
-                    unzip merged-gradle-caches.zip
+                    zip -s 0 gradle-caches.zip --out merged-gradle-caches.zip \ 
+                        && unzip merged-gradle-caches.zip \
+                        || true
                 """
 
                 conditions { doesNotExist("env.SKIP_BUILD") }
