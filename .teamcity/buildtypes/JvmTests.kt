@@ -44,10 +44,6 @@ object JvmTests : BaseBuildType() {
         }
 
         steps {
-            script {
-                scriptContent = "ls .gradle/configuration-cache"
-            }
-
             unpackTestResults()
 
             ifDoesNotExist("env.SKIP_BUILD") {
@@ -61,6 +57,10 @@ object JvmTests : BaseBuildType() {
                 gradle {
                     tasks = "jvmTest"
                     gradleParams = "--dry-run"
+                }
+
+                script {
+                    scriptContent = "ls .gradle/configuration-cache"
                 }
 
                 script {
