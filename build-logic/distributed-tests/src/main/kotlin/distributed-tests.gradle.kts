@@ -13,6 +13,7 @@ val prepareExcludeTestPatterns by tasks.registering(PrepareExcludeTestPatterns::
 allprojects {
     tasks.withType<Test>().configureEach {
         inputs.files(prepareExcludeTestPatterns.flatMap { it.excludePatternsFile })
+        outputs.cacheIf { false }
 
         doFirst {
             val excludePatternsFile = inputs.files.filter { it.name.endsWith(".txt") }.singleFile

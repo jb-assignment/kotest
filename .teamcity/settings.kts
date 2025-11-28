@@ -21,8 +21,6 @@ project {
     }
 
     sequentialChain {
-//        buildType(Debug)
-//        buildType(JvmCompile)
         buildType(JvmTests)
     }
 }
@@ -40,38 +38,6 @@ abstract class BaseBuildType : BuildType() {
         requirements {
             add {
                 matches("teamcity.agent.jvm.os.family", "Linux")
-            }
-        }
-    }
-}
-
-object Debug : BaseBuildType() {
-    init {
-        name = "Debug"
-
-        steps {
-            gradle {
-                tasks = "assemble"
-            }
-        }
-
-        triggers {
-            vcs { }
-        }
-    }
-}
-
-object JvmCompile : BaseBuildType() {
-    init {
-        name = "Compile all JVM"
-
-        params {
-            param("env.PUSH_TO_BUILD_CACHE", "true")
-        }
-
-        steps {
-            gradle {
-                tasks = "compileAllKotlinJvm"
             }
         }
     }
@@ -114,7 +80,7 @@ object JvmTests : BaseBuildType() {
         steps {
             script {
                 workingDir = "test-results"
-                scriptContent = "unzip -o '*.zip'"
+                scriptContent = "unzip -o '*.zip' || true"
             }
 
             script {
