@@ -107,9 +107,8 @@ object JvmTests : BaseBuildType() {
                 name = "Unpack Gradle caches"
                 workingDir = "%env.HOME%/.gradle/caches"
                 scriptContent = """
-                    zip -s 0 gradle-caches.zip --out merged-gradle-caches.zip \ 
-                        && unzip merged-gradle-caches.zip \
-                        || true
+                    zip -s 0 gradle-caches.zip --out merged-gradle-caches.zip || true
+                    unzip merged-gradle-caches.zip || true
                 """
 
                 conditions { doesNotExist("env.SKIP_BUILD") }
