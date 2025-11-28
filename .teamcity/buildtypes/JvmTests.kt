@@ -56,6 +56,7 @@ object JvmTests : BaseBuildType() {
 
                 gradle {
                     tasks = "jvmTest"
+                    gradleParams = "--dry-run"
                 }
 
                 script {
