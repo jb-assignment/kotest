@@ -10,6 +10,7 @@ import org.gradle.kotlin.dsl.property
 import org.w3c.dom.Element
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @CacheableTask
@@ -51,7 +52,7 @@ abstract class GroupTestsIntoBatches : DefaultTask() {
                     val testResult = TestResult(
                         classname = node.getAttribute("classname"),
                         name = node.getAttribute("name"),
-                        time = node.getAttribute("time").toDouble().seconds,
+                        duration = node.getAttribute("time").toDouble().seconds,
                     )
                     add(testResult)
                 }
@@ -61,23 +62,19 @@ abstract class GroupTestsIntoBatches : DefaultTask() {
 
     private fun groupIntoBatches(testResults: List<TestResult>): List<TestBatch> {
         val numberOfBatches = numberOfBatches.get()
-        val batches = mutableMapOf<Int, MutableList<TestResult>>()
+        val batches: List<MutableTestBatch> = (1..numberOfBatches).map(::MutableTestBatch)
 
-        for (i in 1..numberOfBatches) {
-            batches[i] = mutableListOf()
+        val testClassesFromSlowest = testResults
+            .groupBy(TestResult::classname)
+            .mapValues { (classname, tests) -> TestClass(classname, tests) }
+            .values
+            .sortedByDescending(TestClass::totalDuration)
+
+        for (testClass in testClassesFromSlowest) {
+            val smallestBatch = batches.minBy(MutableTestBatch::totalDuration)
+            smallestBatch.addTests(testClass.tests)
         }
-
-        val testsByClass = testResults
-            .groupBy { it.classname }
-            .map { (_, tests) -> tests }
-            .sortedByDescending { classTests -> classTests.sumOf { it.time.inWholeMilliseconds } }
-
-        testsByClass.forEach { classTests ->
-            val smallestBatch = batches.minBy { (_, tests) -> tests.sumOf { it.time.inWholeMilliseconds } }
-            smallestBatch.value.addAll(classTests)
-        }
-
-        return batches.entries.map { (number, tests) -> TestBatch(number, tests) }
+        return batches.map(MutableTestBatch::toTestBatch)
     }
 
     private fun writeBatchesToOutputDir(batches: List<TestBatch>) {
@@ -102,3 +99,24 @@ abstract class GroupTestsIntoBatches : DefaultTask() {
         logger.lifecycle(message)
     }
 }
+
+private data class TestClass(
+    val classname: String,
+    val tests: List<TestResult>
+) {
+    val totalDuration = tests.totalDuration()
+}
+
+private class MutableTestBatch(val number: Int) {
+    private val tests = mutableListOf<TestResult>()
+    val totalDuration = tests.totalDuration()
+
+    fun addTests(test: List<TestResult>) {
+        tests.addAll(test)
+    }
+
+    fun toTestBatch() = TestBatch(number, tests, totalDuration)
+}
+
+private fun List<TestResult>.totalDuration() =
+    map(TestResult::duration).reduce(Duration::plus)
