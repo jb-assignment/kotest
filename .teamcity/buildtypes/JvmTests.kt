@@ -46,7 +46,7 @@ object JvmTests : BaseBuildType() {
 
         steps {
             script {
-                scriptContent = "ls /.gradle/configuration-cache"
+                scriptContent = "ls .gradle/configuration-cache"
             }
 
             unpackTestResults()
