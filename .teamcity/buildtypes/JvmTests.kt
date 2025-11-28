@@ -30,13 +30,8 @@ object JvmTests : BaseBuildType() {
 
         val numberOfBatches = 1
 
-        features {
-            matrix {
-                param("batchNumber", (1..numberOfBatches).map { value(it.toString()) })
-            }
-        }
-
         params {
+            param("batchNumber", "1")
             param("env.BATCH_NUMBER", "%batchNumber%")
             param("env.NUMBER_OF_BATCHES", "$numberOfBatches")
         }
