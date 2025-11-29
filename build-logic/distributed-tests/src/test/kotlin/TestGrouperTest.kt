@@ -1,0 +1,56 @@
+import io.kotest.inspectors.shouldForOne
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotContain
+import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.milliseconds
+
+class TestGrouperTest {
+
+    @Test
+    fun `should put tests from the same class into the same batch`() {
+        // given
+        val numberOfBatches = 2
+
+        val firstTest = testResult("fist test", "com.example.SomeClass")
+        val secondTest = testResult("second test", "com.example.SomeClass")
+        val thirdTest = testResult("third test", "com.example.AnotherClass")
+        val testResults = listOf(firstTest, secondTest, thirdTest)
+
+        // when
+        val batches = TestGrouper.groupIntoBatches(numberOfBatches, testResults)
+
+        // then
+        batches shouldHaveSize 2
+        batches.shouldForOne { it.tests.shouldContainExactlyInAnyOrder(firstTest, secondTest) }
+        batches.shouldForOne { it.tests.shouldContainExactlyInAnyOrder(thirdTest) }
+    }
+
+    @Test
+    fun `should put tests from classes with common prefix into the same batch`() {
+        // given
+        val numberOfBatches = 2
+
+        val firstTest = testResult("fist test", "com.example.SomeClass")
+        val secondTest = testResult("second test", "com.example.SomeClassWithSuffix")
+        val thirdTest = testResult("third test", "com.example.AnotherClass")
+        val testResults = listOf(firstTest, secondTest, thirdTest)
+
+        // when
+        val batches = TestGrouper.groupIntoBatches(numberOfBatches, testResults)
+
+        // then
+        batches shouldHaveSize 2
+        batches.shouldForOne { it.tests.shouldContainExactlyInAnyOrder(firstTest, secondTest) }
+        batches.shouldForOne { it.tests.shouldContainExactlyInAnyOrder(thirdTest) }
+    }
+
+    private fun testResult(name: String, classname: String) =
+        TestResult(
+            name = name,
+            classname = classname,
+            result = "successful",
+            duration = 5.milliseconds
+        )
+}
