@@ -6,12 +6,12 @@ internal object TestGrouper {
     fun groupIntoBatches(numberOfBatches: Int, testResults: List<TestResult>): List<TestBatch> {
         val batches: List<MutableTestBatch> = (1..numberOfBatches).map(::MutableTestBatch)
 
-        val testClassesFromSlowest = findAtomicGroups(testResults)
+        val atomicGroupsFromSlowest = findAtomicGroups(testResults)
             .sortedByDescending(AtomicTestGroup::totalDuration)
 
-        for (testClass in testClassesFromSlowest) {
+        for (atomicGroup in atomicGroupsFromSlowest) {
             val smallestBatch = batches.minBy(MutableTestBatch::totalDuration)
-            smallestBatch.addTests(testClass.tests)
+            smallestBatch.addTests(atomicGroup.tests)
         }
         return batches.map(MutableTestBatch::toTestBatch)
     }
@@ -24,39 +24,43 @@ internal object TestGrouper {
             .toList()
 
         val commonPrefixes = testClasses
-            .groupBy(AtomicTestGroup::packageName)
+            .groupBy { it.commonPrefix.substringBeforeLast(".") }
+            .filterValues { it.size >= 2 }
             .mapNotNull { (packageName, classes) ->
                 Combinations.of(classes.size, 2)
                     .map { Pair(classes[it[0]], classes[it[1]]) }
-                    .map { (a, b) -> a.simpleClassName.commonPrefixWith(b.simpleClassName) }
+                    .map { (a, b) -> a.commonPrefix.substringAfterLast(".").commonPrefixWith(b.commonPrefix.substringAfterLast(".")) }
                     .filter(String::isNotBlank)
                     .map { prefix -> "$packageName.$prefix" }
             }
             .flatten()
+            .distinct()
 
-        val testClassesPerCommonPrefix = commonPrefixes
-            .associateWith { prefix -> testClasses.filter { testClass -> testClass.fullyQualifiedClassName.startsWith(prefix) } }
+        val testClassesWithCommonPrefix = commonPrefixes
+            .map { prefix ->
+                testClasses
+                    .filter { testClass -> testClass.commonPrefix.startsWith(prefix) }
+                    .reduce { a, b -> a.merge(prefix, b) }
+            }
 
         val testClassesWithoutCommonPrefix = testClasses
-            .filter { testClass -> commonPrefixes.none { prefix -> testClass.fullyQualifiedClassName.startsWith(prefix) } }
+            .filter { testClass -> commonPrefixes.none { prefix -> testClass.commonPrefix.startsWith(prefix) } }
 
-        return testClasses.toList()
+        return testClassesWithCommonPrefix + testClassesWithoutCommonPrefix
     }
 }
 
 private data class AtomicTestGroup(
-    val fullyQualifiedClassName: String,
+    val commonPrefix: String,
     val tests: List<TestResult>
 ) {
-    val packageName = fullyQualifiedClassName.substringBeforeLast(".")
-    val simpleClassName = fullyQualifiedClassName.substringAfterLast(".")
     val totalDuration = tests.totalDuration()
 
-//    fun merge(other: AtomicTestGroup) =
-//        AtomicTestGroup(
-//            commonPrefix = this.commonPrefix.commonPrefixWith(other.commonPrefix),
-//            tests = this.tests + other.tests
-//        )
+    fun merge(commonPrefix: String, other: AtomicTestGroup) =
+        AtomicTestGroup(
+            commonPrefix = commonPrefix,
+            tests = this.tests + other.tests
+        )
 }
 
 private class MutableTestBatch(val number: Int) {

@@ -1,8 +1,9 @@
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.inspectors.shouldForOne
-import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.collections.shouldNotContainAll
 import org.junit.jupiter.api.Test
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -13,7 +14,7 @@ class TestGrouperTest {
         // given
         val numberOfBatches = 2
 
-        val firstTest = testResult("fist test", "com.example.SomeClass")
+        val firstTest = testResult("first test", "com.example.SomeClass")
         val secondTest = testResult("second test", "com.example.SomeClass")
         val thirdTest = testResult("third test", "com.example.AnotherClass")
         val testResults = listOf(firstTest, secondTest, thirdTest)
@@ -32,7 +33,7 @@ class TestGrouperTest {
         // given
         val numberOfBatches = 2
 
-        val firstTest = testResult("fist test", "com.example.SomeClass")
+        val firstTest = testResult("first test", "com.example.SomeClass")
         val secondTest = testResult("second test", "com.example.SomeClassWithSuffix")
         val thirdTest = testResult("third test", "com.example.AnotherClass")
         val fourthTest = testResult("fourth test", "com.example.nested.SomeClass")
@@ -44,8 +45,30 @@ class TestGrouperTest {
 
         // then
         batches shouldHaveSize 2
-        batches.shouldForOne { it.tests.shouldContainExactlyInAnyOrder(firstTest, secondTest) }
-        batches.shouldForOne { it.tests.shouldContainExactlyInAnyOrder(thirdTest) }
+        batches.shouldForOne {
+            it.tests.shouldContainAll(firstTest, secondTest)
+            it.tests.shouldNotContainAll(fourthTest, fifthTest)
+        }
+        batches.shouldForOne {
+            it.tests.shouldContainAll(fourthTest, fifthTest)
+            it.tests.shouldNotContainAll(firstTest, secondTest)
+        }
+    }
+
+    @Test
+    fun `should not fail when there is only one class in a package`() {
+        // given
+        val numberOfBatches = 2
+        val testResults = listOf(
+            testResult("first test", "com.example.first.FirstClass"),
+            testResult("second test", "com.example.second.SecondClass"),
+            testResult("third test", "com.example.third.ThirdClass")
+        )
+
+        // expect
+        shouldNotThrow<Exception> {
+            TestGrouper.groupIntoBatches(numberOfBatches, testResults)
+        }
     }
 
     private fun testResult(name: String, classname: String) =

@@ -47,6 +47,7 @@ agp = "8.10.0"
 binary-compatibility-validator = "0.18.1"
 decoroutinator = "2.5.8"
 pitest = "1.20.1"
+kotest = "6.0.5"
 
 ### Java compilation ###
 # Kotest's minimum supported Java version.
@@ -96,6 +97,8 @@ junit-platform-api = { module = "org.junit.platform:junit-platform-suite-api", v
 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
+
+kotest-assertions = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
 
 mockserver-client-java = { module = "org.mock-server:mockserver-client-java", version.ref = "mockserver" }
 mockserver-netty = { module = "org.mock-server:mockserver-netty", version.ref = "mockserver" }
