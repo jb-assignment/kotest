@@ -8,6 +8,8 @@ import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import org.w3c.dom.Element
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.time.Duration
@@ -28,14 +30,14 @@ abstract class GroupTestsIntoBatches : DefaultTask() {
 
     @TaskAction
     fun execute() {
-        val testResults = collectTestResults(testResultsDir.get().asFile)
+        val testResults = collectTestResults()
         val batches = groupIntoBatches(testResults)
         writeBatchesToOutputDir(batches)
         logSummaryMessage(testResults, batches)
     }
 
-    private fun collectTestResults(testResultsDir: File): List<TestResult> =
-        testResultsDir
+    private fun collectTestResults(): List<TestResult> =
+        testResultsDir.get().asFile
             .walk()
             .filter { it.name.endsWith(".xml") }
             .flatMap(::parseXmlTestResults)
@@ -43,19 +45,25 @@ abstract class GroupTestsIntoBatches : DefaultTask() {
 
     private fun parseXmlTestResults(testResultsFile: File): List<TestResult> {
         val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testResultsFile)
-        val testcaseNodes = document.getElementsByTagName("testcase")
+        val testcaseNodes = document.getElementsByTagName("testcase").toList()
 
         return buildList {
-            for (i in 0 until testcaseNodes.length) {
-                val node = testcaseNodes.item(i)
-                if (node is Element) {
-                    val testResult = TestResult(
-                        classname = node.getAttribute("classname"),
-                        name = node.getAttribute("name"),
-                        duration = node.getAttribute("time").toDouble().seconds,
-                    )
-                    add(testResult)
+            for (node in testcaseNodes) {
+                node as? Element ?: continue
+
+                val childNodes = node.childNodes.toList()
+                val result = when {
+                    childNodes.any { it.nodeName == "failure" } -> "failed"
+                    childNodes.any { it.nodeName == "skipped" } -> "skipped"
+                    else -> "successful"
                 }
+                val testResult = TestResult(
+                    classname = node.getAttribute("classname"),
+                    name = node.getAttribute("name"),
+                    result = result,
+                    duration = node.getAttribute("time").toDouble().seconds,
+                )
+                add(testResult)
             }
         }
     }
@@ -79,6 +87,10 @@ abstract class GroupTestsIntoBatches : DefaultTask() {
 
     private fun writeBatchesToOutputDir(batches: List<TestBatch>) {
         val outputDir = batchesOutputDir.get().asFile
+
+        if (outputDir.exists()) {
+            outputDir.deleteRecursively()
+        }
         outputDir.mkdirs()
 
         batches.forEach { batch ->
@@ -120,3 +132,10 @@ private class MutableTestBatch(val number: Int) {
 
 private fun List<TestResult>.totalDuration() =
     map(TestResult::duration).fold(Duration.ZERO, Duration::plus)
+
+private fun NodeList.toList(): List<Node> =
+    buildList {
+        for (i in 0 until length) {
+            add(item(i))
+        }
+    }
