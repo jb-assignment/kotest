@@ -35,7 +35,9 @@ class TestGrouperTest {
         val firstTest = testResult("fist test", "com.example.SomeClass")
         val secondTest = testResult("second test", "com.example.SomeClassWithSuffix")
         val thirdTest = testResult("third test", "com.example.AnotherClass")
-        val testResults = listOf(firstTest, secondTest, thirdTest)
+        val fourthTest = testResult("fourth test", "com.example.nested.SomeClass")
+        val fifthTest = testResult("fifth test", "com.example.nested.SomeClassWithSuffix")
+        val testResults = listOf(firstTest, secondTest, thirdTest, fourthTest, fifthTest)
 
         // when
         val batches = TestGrouper.groupIntoBatches(numberOfBatches, testResults)

@@ -23,13 +23,22 @@ internal object TestGrouper {
             .values
             .toList()
 
-//        val testClassesPerPackage = testClasses.groupBy(AtomicTestGroup::packageName)
-//
-//        testClassesPerPackage.forEach { (packageName, classes) ->
-//            Combinations.of(classes.size, 2)
-//                .map { Pair(classes[it[0]], classes[it[1]]) }
-//                .map { (a, b) -> a.simpleClassName.commonPrefixWith(b.simpleClassName) }
-//        }
+        val commonPrefixes = testClasses
+            .groupBy(AtomicTestGroup::packageName)
+            .mapNotNull { (packageName, classes) ->
+                Combinations.of(classes.size, 2)
+                    .map { Pair(classes[it[0]], classes[it[1]]) }
+                    .map { (a, b) -> a.simpleClassName.commonPrefixWith(b.simpleClassName) }
+                    .filter(String::isNotBlank)
+                    .map { prefix -> "$packageName.$prefix" }
+            }
+            .flatten()
+
+        val testClassesPerCommonPrefix = commonPrefixes
+            .associateWith { prefix -> testClasses.filter { testClass -> testClass.fullyQualifiedClassName.startsWith(prefix) } }
+
+        val testClassesWithoutCommonPrefix = testClasses
+            .filter { testClass -> commonPrefixes.none { prefix -> testClass.fullyQualifiedClassName.startsWith(prefix) } }
 
         return testClasses.toList()
     }
