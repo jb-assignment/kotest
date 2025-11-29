@@ -9,9 +9,7 @@ fun BuildSteps.unpackTestResults(customizer: ScriptBuildStep.() -> Unit = {}) {
         name = "Unpack test results"
         workingDir = "test-results"
         scriptContent = """
-            unzip -o '*.zip' || true
-            
-            FILE="test-results/test-results-1.zip"
+            FILE="test-results-1.zip"
 
             if [ "%batchNumber%" = "1" ]; then
                 echo "Batch 1 detected: Always running (skipping file check)."
@@ -24,6 +22,8 @@ fun BuildSteps.unpackTestResults(customizer: ScriptBuildStep.() -> Unit = {}) {
                 echo "##teamcity[setParameter name='env.SKIP_BUILD' value='true']"
                 exit 0
             fi
+            
+            unzip -o '*.zip' || true
         """
     }
 }
