@@ -28,9 +28,7 @@ project {
         }
 
         requirements {
-            add {
-                matches("teamcity.agent.jvm.os.family", "Linux")
-            }
+            add { matches("teamcity.agent.jvm.os.family", "Linux") }
         }
     }
 
