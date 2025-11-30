@@ -2,7 +2,6 @@ import utils.configureGradleDaemonJvm
 
 plugins {
    id("kotest-base")
-   id("distributed-tests")
    java
    alias(libs.plugins.kotlinBinaryCompatibilityValidator)
    alias(libs.plugins.nmcpAggregation)

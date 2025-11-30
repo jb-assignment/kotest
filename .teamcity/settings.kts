@@ -14,7 +14,11 @@ project {
         param("teamcity.agent.inactive.threshold.secs", "3600")
     }
 
-    val jvmTests = DistributedTests(testTask = "jvmTest", numberOfBatches = 5) {
+    val jvmTests = DistributedTests(
+        testTask = "jvmTest",
+        numberOfBatches = 5,
+        debugMode = true
+    ) {
         vcs {
             root(DslContext.settingsRoot)
         }

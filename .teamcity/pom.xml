@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <name>Hermes Config DSL Script</name>
-  <groupId>Hermes</groupId>
-  <artifactId>Hermes_dsl</artifactId>
+  <name>Kotest Config DSL Script</name>
+  <groupId>Kotest</groupId>
+  <artifactId>Kotest_dsl</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <parent>

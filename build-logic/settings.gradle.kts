@@ -20,5 +20,3 @@ dependencyResolutionManagement {
       }
    }
 }
-
-include("distributed-tests")
