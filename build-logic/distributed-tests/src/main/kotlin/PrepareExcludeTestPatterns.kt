@@ -43,7 +43,7 @@ abstract class PrepareExcludeTestPatterns : DefaultTask() {
 
     private fun writeExcludesFile(testsToExclude: List<TestResult>) {
         val content = testsToExclude
-            .map { "${it.classname}*" }
+            .map { "${it.classname.topLevelClassFqn()}*" }
             .distinct()
             .joinToString("\n")
         excludePatternsFile.get().asFile.writeText(content)
@@ -54,4 +54,21 @@ abstract class PrepareExcludeTestPatterns : DefaultTask() {
         val testCount = currentBatch?.tests?.size ?: 0
         logger.lifecycle("Running $testCount tests from batch ${batchNumber.get()} + any tests recently added")
     }
+}
+
+private fun String.topLevelClassFqn(): String {
+    val parts = split(".")
+    val newParts = buildList {
+        var uppercasePartEncountered = false
+        for (part in parts) {
+            if (part.first().isUpperCase()) {
+                if (uppercasePartEncountered) {
+                    break
+                }
+                uppercasePartEncountered = true
+            }
+            add(part)
+        }
+    }
+    return newParts.joinToString(".")
 }

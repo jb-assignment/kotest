@@ -71,6 +71,25 @@ class TestGrouperTest {
         }
     }
 
+    @Test
+    fun `should support edge case`() {
+        // given
+        val numberOfBatches = 2
+        val testResults = listOf(
+            testResult("first test", "com.sksamuel.kotest.engine.spec.dsl.callbackorder.FunSpecConfigEnabledTest"),
+            testResult("second test", "com.sksamuel.kotest.engine.spec.dsl.callbackorder.FunSpecNestedBeforeAfterContainerTest"),
+            testResult("third test", "com.sksamuel.kotest.engine.spec.dsl.callbackorder.FunSpecNestedBeforeAfterTest"),
+            testResult("fourth test", "com.sksamuel.kotest.engine.spec.dsl.callbackorder.FunSpecNestedBeforeAfterEachTest"),
+            testResult("fifth test", "com.sksamuel.kotest.engine.spec.dsl.callbackorder.FunSpecNestedBeforeAfterAnyTest"),
+        )
+
+        // when
+        val batches = TestGrouper.groupIntoBatches(numberOfBatches, testResults)
+
+        // then
+        batches shouldHaveSize 2
+    }
+
     private fun testResult(name: String, classname: String) =
         TestResult(
             name = name,
