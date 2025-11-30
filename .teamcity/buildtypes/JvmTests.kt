@@ -1,5 +1,6 @@
 package buildtypes
 
+import com.google.common.collect.Collections2
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.matrix
@@ -11,6 +12,8 @@ import util.ifDoesNotExist
 
 object JvmTests : BaseBuildType() {
     init {
+        Collections2.permutations(listOf(1, 2, 3, 4, 5)).forEach { println(it) }
+
         name = "JVM tests"
         artifactRules = """
             +:**/build/test-results/**/TEST-*.xml => test-results-%batchNumber%.zip
