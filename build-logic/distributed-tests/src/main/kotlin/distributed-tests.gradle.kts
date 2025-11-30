@@ -1,6 +1,6 @@
 val groupTestsIntoBatches by tasks.registering(GroupTestsIntoBatches::class) {
     numberOfBatches = System.getenv("NUMBER_OF_BATCHES")?.toInt() ?: 1
-    testResultsDir = projectDir.resolve("test-results") // TODO build/test-results
+    testResultsDir = projectDir.resolve(System.getenv("TEST_RESULTS_DIR") ?: "test-results") // TODO build/test-results
     batchesOutputDir = layout.buildDirectory.dir("test-batches")
 }
 

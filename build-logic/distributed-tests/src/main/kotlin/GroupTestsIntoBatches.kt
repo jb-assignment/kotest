@@ -7,8 +7,9 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
+import org.gradle.work.DisableCachingByDefault
 
-@CacheableTask
+@DisableCachingByDefault
 abstract class GroupTestsIntoBatches : DefaultTask() {
 
     @Input
@@ -58,6 +59,7 @@ abstract class GroupTestsIntoBatches : DefaultTask() {
             batches.forEach {
                 appendLine("${it.number}. tests = ${it.tests.size}, total duration = ${it.totalDuration}")
             }
+            appendLine("= ${allTestResults.size}")
         }
         logger.lifecycle(message)
     }
