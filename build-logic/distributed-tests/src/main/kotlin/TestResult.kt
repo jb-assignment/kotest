@@ -6,4 +6,8 @@ internal data class TestResult(
     val classname: String,
     val result: String,
     val duration: Duration,
-) : Serializable
+) : Serializable {
+
+    // TODO display it this way only in tests
+    override fun toString() = name
+}

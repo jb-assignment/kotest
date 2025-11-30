@@ -37,15 +37,18 @@ internal object TestGrouper {
             .distinct()
             .toMutableList()
 
-        Combinations.of(commonPrefixes.size, 2)
-            .map { Pair(commonPrefixes[it[0]], commonPrefixes[it[1]]) }
-            .forEach { (a, b) ->
-                if (a.substringAfterLast(".").startsWith(b.substringAfterLast("."))) {
-                    commonPrefixes.remove(a)
-                } else if (b.substringAfterLast(".").startsWith(a.substringAfterLast("."))) {
-                    commonPrefixes.remove(b)
+        if (commonPrefixes.size >= 2) {
+            Combinations.of(commonPrefixes.size, 2)
+                .map { Pair(commonPrefixes[it[0]], commonPrefixes[it[1]]) }
+                .filter { (a, b) -> a.substringBeforeLast(".") == b.substringBeforeLast(".") }
+                .forEach { (a, b) ->
+                    if (a.substringAfterLast(".").startsWith(b.substringAfterLast("."))) {
+                        commonPrefixes.remove(a)
+                    } else if (b.substringAfterLast(".").startsWith(a.substringAfterLast("."))) {
+                        commonPrefixes.remove(b)
+                    }
                 }
-            }
+        }
 
         val testClassesWithCommonPrefix = commonPrefixes
             .map { prefix ->
