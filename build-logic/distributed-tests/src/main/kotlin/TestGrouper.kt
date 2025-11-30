@@ -19,12 +19,14 @@ internal object TestGrouper {
     private fun findAtomicGroups(testResults: List<TestResult>): List<AtomicTestGroup> {
         val testClasses = testResults
             .groupBy(TestResult::classname)
+            .toSortedMap()
             .mapValues { (classname, tests) -> AtomicTestGroup(classname, tests) }
             .values
             .toList()
 
         val commonPrefixes = testClasses
             .groupBy { it.commonPrefix.substringBeforeLast(".") }
+            .toSortedMap()
             .filterValues { it.size >= 2 }
             .mapNotNull { (packageName, classes) ->
                 Combinations.of(classes.size, 2)
