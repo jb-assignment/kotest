@@ -14,6 +14,7 @@ allprojects {
     tasks.withType<Test>().configureEach {
         inputs.files(prepareExcludeTestPatterns.flatMap { it.excludePatternsFile })
         outputs.cacheIf { false }
+        outputs.upToDateWhen { false }
 
         doFirst {
             val excludePatternsFile = inputs.files.filter { it.name.endsWith(".txt") }.singleFile
