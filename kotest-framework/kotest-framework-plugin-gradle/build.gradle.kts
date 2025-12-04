@@ -76,6 +76,7 @@ tasks {
       description = "Generates the version for the Kotest Gradle plugin"
       val propFile = project.layout.buildDirectory.file("generated/kotest.gradle.properties").get()
       outputs.file(propFile)
+      notCompatibleWithConfigurationCache("")
       doLast {
          mkdir(propFile.asFile.parentFile)
          Files.writeString(propFile.asFile.toPath(), "version=${project.version}")
